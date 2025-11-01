@@ -1,14 +1,30 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { TrendingUp, MapPin, Clock, Users, AlertCircle, Eye } from 'lucide-react';
+import { TrendingUp, MapPin, Clock, Users, AlertCircle, Eye, Loader2 } from 'lucide-react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { toast } from 'sonner';
 
 interface TrendingPageProps {
   language: string;
 }
 
-const trendingStories = [
+interface TrendingTopic {
+  id: number;
+  title: string;
+  category: string;
+  fake_count: number;
+  real_count: number;
+  total_checks: number;
+  trending_score: number;
+  created_at: string;
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+// Legacy dummy data as fallback
+const fallbackStories = [
   {
     id: 1,
     headline: 'Viral video claims government policy change',
@@ -27,42 +43,6 @@ const trendingStories = [
     timeAgo: '5 hours ago',
     engagement: '32K views',
   },
-  {
-    id: 3,
-    headline: 'Health remedy claims on WhatsApp',
-    region: 'West Bengal',
-    reports: 2156,
-    status: 'fake',
-    timeAgo: '1 day ago',
-    engagement: '78K views',
-  },
-  {
-    id: 4,
-    headline: 'Political statement attributed to leader',
-    region: 'Tamil Nadu',
-    reports: 654,
-    status: 'unverified',
-    timeAgo: '3 hours ago',
-    engagement: '23K views',
-  },
-  {
-    id: 5,
-    headline: 'Natural disaster warning message',
-    region: 'Delhi',
-    reports: 3421,
-    status: 'fake',
-    timeAgo: '30 minutes ago',
-    engagement: '102K views',
-  },
-  {
-    id: 6,
-    headline: 'Government benefit scheme announcement',
-    region: 'Gujarat',
-    reports: 567,
-    status: 'verified',
-    timeAgo: '6 hours ago',
-    engagement: '18K views',
-  },
 ];
 
 const regionalHotspots = [
@@ -75,19 +55,65 @@ const regionalHotspots = [
 ];
 
 export function TrendingPage({ language }: TrendingPageProps) {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'fake':
-        return 'bg-red-100 text-red-700 border-red-300';
-      case 'deepfake':
-        return 'bg-orange-100 text-orange-700 border-orange-300';
-      case 'unverified':
-        return 'bg-yellow-100 text-yellow-700 border-yellow-300';
-      case 'verified':
-        return 'bg-green-100 text-green-700 border-green-300';
-      default:
-        return 'bg-gray-100 text-gray-700 border-gray-300';
+  const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchTrendingTopics();
+  }, []);
+
+  const fetchTrendingTopics = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch(`${API_BASE_URL}/api/v1/trending?limit=10`);
+      
+      if (!response.ok) {
+        if (response.status === 503) {
+          throw new Error('Real-time trending data unavailable. Please configure API.');
+        }
+        throw new Error('Failed to fetch trending topics');
+      }
+      
+      const data = await response.json();
+      setTrendingTopics(data);
+    } catch (err: any) {
+      console.error('Error fetching trending topics:', err);
+      setError(err.message || 'Failed to load trending topics');
+      toast.error('Could not load real-time trending data');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const getStatusColor = (category: string) => {
+    switch (category) {
+      case 'politics':
+        return 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-400';
+      case 'health':
+        return 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400';
+      case 'science':
+        return 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400';
+      case 'entertainment':
+        return 'bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400';
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-900/30 dark:text-gray-400';
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 60) return `${diffMins} minutes ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays} days ago`;
   };
 
   return (
@@ -264,34 +290,82 @@ export function TrendingPage({ language }: TrendingPageProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <h3 className="mb-6">Top Trending Stories</h3>
+          <h3 className="mb-6">Top Trending Topics</h3>
+          
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            </div>
+          )}
+          
+          {error && !loading && (
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
+              <p className="text-yellow-800 dark:text-yellow-400 text-sm">{error}</p>
+            </div>
+          )}
+          
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {trendingStories.map((story, idx) => (
-              <motion.div
-                key={story.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 + idx * 0.1 }}
-                whileHover={{ y: -5 }}
-              >
-                <Card className="glass-card p-6 h-full hover:shadow-xl transition-shadow cursor-pointer">
-                  <div className="flex items-start justify-between mb-3">
-                    <Badge className={`${getStatusColor(story.status)} border`}>
-                      {story.status.toUpperCase()}
-                    </Badge>
-                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                      <AlertCircle className="w-4 h-4" />
-                      <span>{story.reports}</span>
+            {(trendingTopics.length > 0 ? trendingTopics : fallbackStories).map((story, idx) => {
+              const isApiData = 'trending_score' in story;
+              const title = isApiData ? (story as TrendingTopic).title : (story as typeof fallbackStories[0]).headline;
+              const category = isApiData ? (story as TrendingTopic).category : 'general';
+              const reports = isApiData ? (story as TrendingTopic).total_checks : (story as typeof fallbackStories[0]).reports;
+              const timeAgo = isApiData ? formatTimeAgo((story as TrendingTopic).created_at) : (story as typeof fallbackStories[0]).timeAgo;
+              const region = isApiData ? 'Global' : (story as typeof fallbackStories[0]).region;
+              const engagement = isApiData ? `${Math.floor(reports / 10)}K views` : (story as typeof fallbackStories[0]).engagement;
+              
+              return (
+                <motion.div
+                  key={story.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 + idx * 0.1 }}
+                  whileHover={{ y: -5 }}
+                >
+                  <Card className="glass-card p-6 h-full hover:shadow-xl transition-shadow cursor-pointer">
+                    <div className="flex items-start justify-between mb-3">
+                      <Badge className={`${getStatusColor(category)} border`}>
+                        {category.toUpperCase()}
+                      </Badge>
+                      <div className="flex items-center gap-1 text-sm text-gray-500">
+                        <AlertCircle className="w-4 h-4" />
+                        <span>{reports}</span>
+                      </div>
                     </div>
-                  </div>
 
-                  <h4 className="mb-4 line-clamp-2">{story.headline}</h4>
+                    <h4 className="mb-4 line-clamp-2">{title}</h4>
 
-                  <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      <span>{story.region}</span>
+                    <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        <span>{region}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4" />
+                        <span>{timeAgo}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Eye className="w-4 h-4" />
+                        <span>{engagement}</span>
+                      </div>
                     </div>
+                    
+                    {isApiData && (
+                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-red-600 dark:text-red-400">
+                            {Math.round(((story as TrendingTopic).fake_count / (story as TrendingTopic).total_checks) * 100)}% fake
+                          </span>
+                          <span className="text-green-600 dark:text-green-400">
+                            {Math.round(((story as TrendingTopic).real_count / (story as TrendingTopic).total_checks) * 100)}% real
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                </motion.div>
+              );
+            })}
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4" />
                       <span>{story.timeAgo}</span>

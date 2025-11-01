@@ -266,7 +266,8 @@ async def receive_webhook(request: Request):
     
     except Exception as e:
         logger.error(f"Webhook error: {str(e)}")
-        return {"status": "error", "message": str(e)}
+        # Don't expose internal error details to external webhook
+        return {"status": "error", "message": "Webhook processing failed"}
 
 
 @app.get("/health")

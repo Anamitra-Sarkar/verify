@@ -4,7 +4,9 @@ import { FileText, Image, Video, Mic, Upload, Loader2, CheckCircle, XCircle, Ale
 import { Button } from './ui/button';
 import { toast } from 'sonner';
 
+
 type ContentType = 'text' | 'image' | 'video' | 'voice' | 'url';
+
 
 interface AnalysisResult {
   status: 'real' | 'fake' | 'uncertain';
@@ -13,6 +15,7 @@ interface AnalysisResult {
   source?: string;
 }
 
+
 const contentTypes = [
   { id: 'text' as ContentType, label: 'Text', icon: FileText },
   { id: 'image' as ContentType, label: 'Image', icon: Image },
@@ -20,6 +23,8 @@ const contentTypes = [
   { id: 'voice' as ContentType, label: 'Voice', icon: Mic },
   { id: 'url' as ContentType, label: 'URL', icon: Link },
 ];
+
+const API_BASE_URL = '/api';
 
 export function AnalyzePageWithDragDrop({ language }: { language: string }) {
   const [activeType, setActiveType] = useState<ContentType>('image');
@@ -31,6 +36,7 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+
   // File type validation
   const acceptedFiles = {
     image: { types: ['image/jpeg', 'image/png', 'image/webp'], maxSize: 10 * 1024 * 1024, extensions: 'JPG, PNG, WebP' },
@@ -38,11 +44,13 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
     voice: { types: ['audio/mpeg', 'audio/wav', 'audio/mp4', 'audio/ogg'], maxSize: 20 * 1024 * 1024, extensions: 'MP3, WAV, M4A, OGG' },
   };
 
+
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
   };
+
 
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -50,13 +58,16 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
     setIsDragging(false);
   };
 
+
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
+
   const validateFile = (file: File): boolean => {
     if (activeType === 'text' || activeType === 'url') return false;
+
 
     const config = acceptedFiles[activeType as 'image' | 'video' | 'voice'];
     
@@ -66,19 +77,23 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
       return false;
     }
 
+
     // Check file size
     if (file.size > config.maxSize) {
       toast.error(`File too large. Max size: ${config.maxSize / (1024 * 1024)}MB`);
       return false;
     }
 
+
     return true;
   };
+
 
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
+
 
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
@@ -89,6 +104,7 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
       }
     }
   };
+
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -101,52 +117,63 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
     }
   };
 
+
   const handleAnalyze = async () => {
     if (activeType === 'text' && !textInput.trim()) {
       toast.error('Please enter some text to analyze');
       return;
     }
 
+
     if (activeType === 'url' && !urlInput.trim()) {
       toast.error('Please enter a URL to analyze');
       return;
     }
+
 
     if (activeType !== 'text' && activeType !== 'url' && !selectedFile) {
       toast.error('Please select a file to analyze');
       return;
     }
 
+
     setIsAnalyzing(true);
     setResult(null);
 
+
     try {
-      const formData = new FormData();
-      
       if (activeType === 'text') {
-        formData.append('content', textInput);
-        const response = await fetch('http://localhost:8000/api/v1/check-text', {
+        const response = await fetch(`${API_BASE_URL}/v1/check-text`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text: textInput }),
         });
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.statusText}`);
+        }
+
         const data = await response.json();
         setResult({
           status: data.is_fake ? 'fake' : 'real',
-          confidence: data.confidence,
+          confidence: data.confidence || 0,
           details: data.analysis || 'Analysis complete',
         });
       } else if (activeType === 'url') {
-        const response = await fetch('http://localhost:8000/api/v1/check-url', {
+        const response = await fetch(`${API_BASE_URL}/v1/check-url`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url: urlInput }),
         });
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.statusText}`);
+        }
+
         const data = await response.json();
         console.log('URL Response:', data);
         console.log('Confidence value:', data.confidence, 'Type:', typeof data.confidence);
         
-        // Ensure confidence is a valid number
         const confidenceValue = Number(data.confidence);
         const finalConfidence = isNaN(confidenceValue) ? 0 : confidenceValue;
         
@@ -159,25 +186,30 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
           source: data.source,
         });
       } else if (selectedFile) {
+        const formData = new FormData();
         formData.append('file', selectedFile);
         
         const endpoints: Record<ContentType, string> = {
-          text: '/api/v1/check-text',
-          image: '/api/v1/check-image',
-          video: '/api/v1/check-video',
-          voice: '/api/v1/check-voice',
-          url: '/api/v1/check-url',
+          text: '/v1/check-text',
+          image: '/v1/check-image',
+          video: '/v1/check-video',
+          voice: '/v1/check-voice',
+          url: '/v1/check-url',
         };
 
-        const response = await fetch(`http://localhost:8000${endpoints[activeType]}`, {
+        const response = await fetch(`${API_BASE_URL}${endpoints[activeType]}`, {
           method: 'POST',
           body: formData,
         });
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.statusText}`);
+        }
         
         const data = await response.json();
         setResult({
           status: data.is_fake ? 'fake' : 'real',
-          confidence: data.confidence,
+          confidence: data.confidence || 0,
           details: data.analysis || 'Analysis complete',
         });
       }
@@ -185,7 +217,7 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
       toast.success('Analysis complete!');
     } catch (error) {
       console.error('Analysis error:', error);
-      toast.error('Analysis failed. Please try again.');
+      toast.error(`Analysis failed: ${error instanceof Error ? error.message : 'Please try again.'}`);
       setResult({
         status: 'uncertain',
         confidence: 0,
@@ -196,6 +228,7 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
     }
   };
 
+
   const handleTypeChange = (type: ContentType) => {
     setActiveType(type);
     setSelectedFile(null);
@@ -204,6 +237,7 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
     setResult(null);
     setIsDragging(false);
   };
+
 
   const getResultIcon = () => {
     if (!result) return null;
@@ -217,6 +251,7 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
     }
   };
 
+
   const getResultColor = () => {
     if (!result) return '';
     switch (result.status) {
@@ -228,6 +263,7 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
         return 'text-yellow-600 dark:text-yellow-400';
     }
   };
+
 
   return (
     <div className="min-h-screen pt-28 pb-16">
@@ -246,6 +282,7 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
               Select content type and upload your file for AI-powered verification
             </p>
           </div>
+
 
           {/* Content Type Tabs */}
           <div className="glass-card rounded-2xl p-6 mb-8">
@@ -268,6 +305,7 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
               ))}
             </div>
           </div>
+
 
           {/* Upload Area */}
           <div className="glass-card rounded-2xl p-8 mb-8">
@@ -351,6 +389,7 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
             )}
           </div>
 
+
           {/* Analyze Button */}
           <Button
             onClick={handleAnalyze}
@@ -371,6 +410,7 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
               'Analyze Content'
             )}
           </Button>
+
 
           {/* Results */}
           {result && (

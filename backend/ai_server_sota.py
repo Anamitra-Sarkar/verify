@@ -26,10 +26,10 @@ from urllib.parse import urlparse
 
 app = FastAPI(title="AI-Powered Deepfake Detection API")
 
-# CORS middleware
+# CORS middleware - FIXED for Brave browser
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -163,6 +163,71 @@ class DeepfakeVideoDetector(nn.Module):
         return self.classifier(features)
 
 
+class DeepfakeVoiceDetector(nn.Module):
+    """
+    SOTA Voice Deepfake Detector with Wav2Vec2 + BiGRU + Multi-Head Attention
+    Architecture from koyelog/deepfake-voice-detector-sota
+    """
+    def __init__(self):
+        super().__init__()
+        from transformers import Wav2Vec2Model
+        
+        # Wav2Vec2 feature extractor (frozen CNN layers)
+        self.wav2vec2 = Wav2Vec2Model.from_pretrained("facebook/wav2vec2-base")
+        
+        # Freeze CNN feature extractor
+        for param in self.wav2vec2.feature_extractor.parameters():
+            param.requires_grad = False
+        
+        # BiGRU: 2 layers, 256 hidden units per direction (512 total)
+        self.bigru = nn.GRU(
+            input_size=768,  # wav2vec2 output dimension
+            hidden_size=256,
+            num_layers=2,
+            batch_first=True,
+            bidirectional=True,
+            dropout=0.3
+        )
+        
+        # Multi-Head Attention: 8 heads, 512-dimensional embeddings
+        self.attention = nn.MultiheadAttention(
+            embed_dim=512,
+            num_heads=8,
+            dropout=0.2,
+            batch_first=True
+        )
+        
+        # Classification head
+        self.classifier = nn.Sequential(
+            nn.Linear(512, 512),
+            nn.ReLU(),
+            nn.BatchNorm1d(512),
+            nn.Dropout(0.4),
+            nn.Linear(512, 128),
+            nn.ReLU(),
+            nn.BatchNorm1d(128),
+            nn.Dropout(0.3),
+            nn.Linear(128, 1)
+        )
+    
+    def forward(self, input_values):
+        # Extract features with Wav2Vec2
+        wav2vec_outputs = self.wav2vec2(input_values).last_hidden_state
+        
+        # BiGRU temporal modeling
+        gru_output, _ = self.bigru(wav2vec_outputs)
+        
+        # Multi-head attention (self-attention)
+        attn_output, _ = self.attention(gru_output, gru_output, gru_output)
+        
+        # Global average pooling over time dimension
+        pooled = torch.mean(attn_output, dim=1)
+        
+        # Classification
+        logits = self.classifier(pooled)
+        return logits
+
+
 # ============================================
 # Load Image Deepfake Detector (EfficientNetV2-S)
 # ============================================
@@ -282,70 +347,6 @@ except Exception as e:
 # Load Voice Deepfake Detector (SOTA)
 # ============================================
 
-class DeepfakeVoiceDetector(nn.Module):
-    """
-    SOTA Voice Deepfake Detector with Wav2Vec2 + BiGRU + Multi-Head Attention
-    Architecture from koyelog/deepfake-voice-detector-sota
-    """
-    def __init__(self):
-        super().__init__()
-        from transformers import Wav2Vec2Model
-        
-        # Wav2Vec2 feature extractor (frozen CNN layers)
-        self.wav2vec2 = Wav2Vec2Model.from_pretrained("facebook/wav2vec2-base")
-        
-        # Freeze CNN feature extractor
-        for param in self.wav2vec2.feature_extractor.parameters():
-            param.requires_grad = False
-        
-        # BiGRU: 2 layers, 256 hidden units per direction (512 total)
-        self.bigru = nn.GRU(
-            input_size=768,  # wav2vec2 output dimension
-            hidden_size=256,
-            num_layers=2,
-            batch_first=True,
-            bidirectional=True,
-            dropout=0.3
-        )
-        
-        # Multi-Head Attention: 8 heads, 512-dimensional embeddings
-        self.attention = nn.MultiheadAttention(
-            embed_dim=512,
-            num_heads=8,
-            dropout=0.2,
-            batch_first=True
-        )
-        
-        # Classification head
-        self.classifier = nn.Sequential(
-            nn.Linear(512, 512),
-            nn.ReLU(),
-            nn.BatchNorm1d(512),
-            nn.Dropout(0.4),
-            nn.Linear(512, 128),
-            nn.ReLU(),
-            nn.BatchNorm1d(128),
-            nn.Dropout(0.3),
-            nn.Linear(128, 1)
-        )
-    
-    def forward(self, input_values):
-        # Extract features with Wav2Vec2
-        wav2vec_outputs = self.wav2vec2(input_values).last_hidden_state
-        
-        # BiGRU temporal modeling
-        gru_output, _ = self.bigru(wav2vec_outputs)
-        
-        # Multi-head attention (self-attention)
-        attn_output, _ = self.attention(gru_output, gru_output, gru_output)
-        
-        # Global average pooling over time dimension
-        pooled = torch.mean(attn_output, dim=1)
-        
-        # Classification
-        logits = self.classifier(pooled)
-        return logits
-
 voice_detector_model = None
 voice_feature_extractor = None
 print("\n🎤 Voice Deepfake Detector will be loaded on first use...")
@@ -421,6 +422,7 @@ def load_text_detectors():
             raise
     
     return fake_news_detector_liar, fake_news_detector_fact_check
+
 
 def load_voice_detector():
     """Lazy load SOTA voice detector with fallback to alternative models"""
@@ -502,6 +504,7 @@ def load_voice_detector():
             print("⚠️ Voice detection will be unavailable")
     
     return voice_detector_model, voice_feature_extractor
+
 
 def analyze_image_with_sota(image_bytes: bytes) -> dict:
     """Analyze image using SOTA EfficientNetV2-S model"""
@@ -661,12 +664,8 @@ def analyze_video_with_sota(video_bytes: bytes) -> dict:
         os.unlink(video_path)
 
 
-# ============================================
-# AI Cross-Verification Functions (Internal Only - Not Exposed to Users)
-# ============================================
-
 def verify_with_gemini_text(text: str, model_prediction: bool, model_confidence: float, tavily_sources: str = "") -> dict:
-    """Use AI to cross-verify text with context awareness (internal use only)"""
+    """Use AI to cross-verify text with context awareness"""
     if not gemini_model:
         return {"override": False, "ai_verdict": None, "should_check": False}
     
@@ -692,7 +691,7 @@ Provide your analysis in JSON format:
 Be extremely precise about current facts vs historical facts."""
         
         response = gemini_model.generate_content(prompt)
-        response_text = response.text.strip().replace('```json', '').replace('```', '')
+        response_text = response.text.strip().replace('``````', '')
         gemini_result = json.loads(response_text)
         
         print(f"\n🔒 AI Cross-Verification:")
@@ -717,7 +716,7 @@ Be extremely precise about current facts vs historical facts."""
 
 
 def verify_with_gemini_image(image_bytes: bytes, model_prediction: bool, model_confidence: float) -> dict:
-    """Use AI to cross-verify image analysis (internal use only)"""
+    """Use AI to cross-verify image analysis"""
     if not gemini_model or not model_prediction:  # Only check if model says it's FAKE
         return {"override": False, "ai_verdict": None}
     
@@ -739,7 +738,7 @@ Respond in JSON format:
 }"""
         
         response = gemini_model.generate_content([prompt, image])
-        gemini_result = json.loads(response.text.strip().replace('```json', '').replace('```', ''))
+        gemini_result = json.loads(response.text.strip().replace('``````', ''))
         
         # If Gemini disagrees with model (model says FAKE, Gemini says REAL)
         if not gemini_result["is_fake"] and model_prediction:
@@ -806,7 +805,7 @@ Respond in JSON format:
         
         # Analyze first frame with Gemini
         response = gemini_model.generate_content([prompt, frames[0]])
-        gemini_result = json.loads(response.text.strip().replace('```json', '').replace('```', ''))
+        gemini_result = json.loads(response.text.strip().replace('``````', ''))
         
         # If Gemini disagrees with model (model says FAKE, Gemini says REAL)
         if not gemini_result["is_fake"] and model_prediction:
@@ -857,7 +856,7 @@ Respond in JSON format:
         
         os.unlink(audio_path)
         
-        gemini_result = json.loads(response.text.strip().replace('```json', '').replace('```', ''))
+        gemini_result = json.loads(response.text.strip().replace('``````', ''))
         
         # If Gemini disagrees with model (model says FAKE, Gemini says REAL)
         if not gemini_result["is_fake"] and model_prediction:
@@ -1169,13 +1168,13 @@ WEB SOURCES (if available):
 
 CLASSIFICATION RULES (STRICT):
 
-MARK AS FAKE (is_fake: TRUE) if the claim is:
+Mark AS FAKE (is_fake: TRUE) if the claim is:
 - A debunked conspiracy theory: "vaccines cause autism", "earth is flat", "5G causes COVID", "moon landing was fake", "climate change is hoax"
 - Contradicts scientific consensus
 - Medical misinformation
 - Contradicts verified historical facts
 
-MARK AS REAL (is_fake: FALSE) if the claim is:
+Mark AS REAL (is_fake: FALSE) if the claim is:
 - A basic scientific fact: "water is H2O", "earth orbits sun", "humans need oxygen", "DNA contains genetic information"
 - A verified historical/political fact: "Obama was 44th president", "Biden is current president", "Paris is capital of France"
 - Matches current verified information
@@ -1209,7 +1208,7 @@ OUTPUT ONLY THIS JSON (no markdown, no explanation):
 }}"""
                 
                 response = gemini_model.generate_content(prompt)
-                response_text = response.text.strip().replace('```json', '').replace('```', '')
+                response_text = response.text.strip().replace('``````', '')
                 gemini_result = json.loads(response_text)
                 
                 predictions.append({
@@ -1227,19 +1226,19 @@ OUTPUT ONLY THIS JSON (no markdown, no explanation):
         
         # Priority: Fast-Path > Gemini > Tavily Web > RoBERTa
         if not final_result and web_verification:
-                # Use web verification if Gemini failed
-                final_result = web_verification
-                print(f"   ✅ Using Tavily web-based verification")
+            # Use web verification if Gemini failed
+            final_result = web_verification
+            print(f"   ✅ Using Tavily web-based verification")
         
         if not final_result and predictions:
-                # RoBERTa as last resort
-                model_pred = predictions[0]
-                final_result = {
-                    'is_fake': model_pred['is_fake'],
-                    'confidence': max(0.55, model_pred['confidence'] * 0.8),
-                    'reasoning': f"RoBERTa model prediction (no web data)"
-                }
-                print(f"   ⚠️ Using RoBERTa only")
+            # RoBERTa as last resort
+            model_pred = predictions[0]
+            final_result = {
+                'is_fake': model_pred['is_fake'],
+                'confidence': max(0.55, model_pred['confidence'] * 0.8),
+                'reasoning': f"RoBERTa model prediction (no web data)"
+            }
+            print(f"   ⚠️ Using RoBERTa only")
         
         # Ultimate fallback
         if not final_result:
@@ -1510,6 +1509,7 @@ async def check_voice(file: UploadFile = File(...)):
                     prob_fake = 0.5
                     model_prediction = False
                     model_confidence = 0.5
+            
             is_fake = prob_fake >= 0.5
             confidence = prob_fake if is_fake else (1.0 - prob_fake)
             

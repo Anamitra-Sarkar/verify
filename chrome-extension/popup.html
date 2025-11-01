@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VeriFy - AI Deepfake Detector</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 380px;
+      min-height: 500px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .status-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .status-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .status-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .status-value {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .scan-button {
+      width: 100%;
+      padding: 14px;
+      background: white;
+      color: #667eea;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .scan-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .scan-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .scan-button.scanning {
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+      background-size: 200% 100%;
+      animation: gradient 2s ease infinite;
+      color: white;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .results-container {
+      max-height: 250px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+    }
+
+    .result-item {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-left: 4px solid;
+    }
+
+    .result-item.fake {
+      border-left-color: #ff4757;
+    }
+
+    .result-item.real {
+      border-left-color: #2ed573;
+    }
+
+    .result-type {
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 600;
+      opacity: 0.8;
+      margin-bottom: 5px;
+    }
+
+    .result-content {
+      font-size: 14px;
+      margin-bottom: 5px;
+      word-break: break-word;
+    }
+
+    .result-verdict {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .verdict-label {
+      font-weight: 700;
+    }
+
+    .confidence {
+      opacity: 0.9;
+    }
+
+    .settings-button {
+      width: 100%;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .settings-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      opacity: 0.8;
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .empty-state-text {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .error-message {
+      background: rgba(255, 71, 87, 0.2);
+      border: 1px solid rgba(255, 71, 87, 0.5);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 15px;
+      font-size: 13px;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      opacity: 0.7;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">✓</div>
+      <div>
+        <h1>VeriFy</h1>
+        <div style="font-size: 12px; opacity: 0.8;">AI Deepfake Detector</div>
+      </div>
+    </div>
+
+    <!-- Status Card -->
+    <div class="status-card">
+      <div class="status-row">
+        <span class="status-label">📄 Text Elements</span>
+        <span class="status-value" id="textCount">-</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">🖼️ Images</span>
+        <span class="status-value" id="imageCount">-</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">🎬 Videos</span>
+        <span class="status-value" id="videoCount">-</span>
+      </div>
+    </div>
+
+    <!-- Scan Button -->
+    <button class="scan-button" id="scanButton">
+      <span>🔍</span>
+      <span id="scanButtonText">Scan This Page</span>
+    </button>
+
+    <!-- Error Message -->
+    <div id="errorMessage" style="display: none;" class="error-message"></div>
+
+    <!-- Results Container -->
+    <div class="results-container" id="resultsContainer">
+      <div class="empty-state">
+        <div class="empty-state-icon">🛡️</div>
+        <div class="empty-state-text">
+          Click "Scan This Page" to analyze content for deepfakes and misinformation
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Button -->
+    <button class="settings-button" id="settingsButton">
+      ⚙️ Settings
+    </button>
+
+    <!-- Footer -->
+    <div class="footer">
+      Powered by SOTA AI Models • Gemini 2.0 Flash Backup
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

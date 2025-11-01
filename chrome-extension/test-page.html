@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriFy Extension Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .test-text {
+            background: #f9f9f9;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+        img {
+            max-width: 400px;
+            height: auto;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧪 VeriFy Extension Test Page</h1>
+        <p>Use this page to test your VeriFy AI Deepfake Detector Chrome Extension</p>
+    </div>
+
+    <div class="instructions">
+        <h3>📋 How to Test:</h3>
+        <ol>
+            <li><strong>Make sure backend is running</strong> at <code>http://localhost:8000</code></li>
+            <li><strong>Click the VeriFy extension icon</strong> in your Chrome toolbar</li>
+            <li><strong>Click "Scan This Page"</strong> button</li>
+            <li><strong>Wait 30-60 seconds</strong> for analysis to complete</li>
+            <li><strong>View results</strong> in the popup and see highlighted content below</li>
+        </ol>
+        <p><strong>Alternative:</strong> Right-click any text, image, or video and select "Check if this [type] is fake"</p>
+    </div>
+
+    <!-- Text Content Section -->
+    <div class="section">
+        <h2>📄 Text Content (For Testing)</h2>
+        
+        <div class="test-text">
+            <strong>Test Statement 1 (Real):</strong><br>
+            The Earth orbits around the Sun, completing one full revolution approximately every 365.25 days. 
+            This is why we have leap years every four years to account for the extra quarter day.
+        </div>
+
+        <div class="test-text">
+            <strong>Test Statement 2 (Potentially Fake):</strong><br>
+            Breaking news: Scientists have discovered that the Earth is actually flat and all previous 
+            evidence of a spherical Earth was fabricated by NASA and other space agencies.
+        </div>
+
+        <div class="test-text">
+            <strong>Test Statement 3 (Current Event):</strong><br>
+            Shubman Gill is currently the captain of the Indian ODI cricket team, leading the squad 
+            in international matches following recent changes in team leadership.
+        </div>
+
+        <div class="test-text">
+            <strong>Test Statement 4 (Temporal Test):</strong><br>
+            Virat Kohli is the current captain of the Indian ODI cricket team and has been leading 
+            the team in all recent international tournaments.
+        </div>
+    </div>
+
+    <!-- Image Section -->
+    <div class="section">
+        <h2>🖼️ Images (For Testing)</h2>
+        <p>Right-click any image below and select "Check if this image is fake"</p>
+        
+        <!-- Placeholder images - using sample images -->
+        <img src="https://via.placeholder.com/400x300/667eea/ffffff?text=Test+Image+1" alt="Test Image 1">
+        <img src="https://via.placeholder.com/400x300/764ba2/ffffff?text=Test+Image+2" alt="Test Image 2">
+    </div>
+
+    <!-- Video Section -->
+    <div class="section">
+        <h2>🎬 Videos (For Testing)</h2>
+        <p>The extension will detect and analyze video elements on the page</p>
+        <video width="400" controls>
+            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <!-- Additional Text Section -->
+    <div class="section">
+        <h2>📰 Sample Article</h2>
+        
+        <h3>Technology Advances in AI Detection</h3>
+        
+        <p>
+            Artificial intelligence has made remarkable progress in recent years, particularly in the field 
+            of deepfake detection. Modern AI systems can now analyze images, videos, and text with 
+            unprecedented accuracy to identify synthetic or manipulated content.
+        </p>
+
+        <p>
+            The challenge of combating misinformation has never been more critical. With the rise of 
+            sophisticated AI-generated content, tools like deepfake detectors have become essential 
+            for maintaining trust in digital media. These systems use advanced neural networks to 
+            identify subtle inconsistencies that human observers might miss.
+        </p>
+
+        <p>
+            State-of-the-art models like EfficientNetV2, Xception, and transformer-based architectures 
+            have achieved accuracy rates exceeding 95% in controlled environments. However, the arms 
+            race between content generators and detectors continues, requiring constant innovation 
+            and improvement.
+        </p>
+
+        <p>
+            Industry experts recommend a multi-layered approach to content verification, combining 
+            automated AI detection with human judgment and fact-checking. This hybrid model provides 
+            the best defense against the spread of misinformation in the digital age.
+        </p>
+    </div>
+
+    <!-- Testing Instructions -->
+    <div class="section">
+        <h2>✅ What to Expect</h2>
+        
+        <h3>When Scanning Works Correctly:</h3>
+        <ul>
+            <li>✅ Extension popup shows counts (e.g., "Text Elements: 8")</li>
+            <li>✅ "Scanning..." animation appears</li>
+            <li>✅ Results appear in popup after 30-60 seconds</li>
+            <li>✅ Fake content gets red borders and highlights</li>
+            <li>✅ Hover over highlighted content to see confidence scores</li>
+        </ul>
+
+        <h3>Expected Results for Test Content:</h3>
+        <ul>
+            <li>📄 <strong>Test Statement 1</strong>: Should be marked as REAL</li>
+            <li>📄 <strong>Test Statement 2</strong>: Should be marked as FAKE (high confidence)</li>
+            <li>📄 <strong>Test Statement 3</strong>: Should be marked as REAL (Gemini verifies current facts)</li>
+            <li>📄 <strong>Test Statement 4</strong>: Should be marked as FAKE (temporal context - Virat is not current captain)</li>
+        </ul>
+    </div>
+
+    <!-- Troubleshooting -->
+    <div class="section">
+        <h2>🔧 Troubleshooting</h2>
+        
+        <h3>If you see "Could not establish connection":</h3>
+        <ol>
+            <li><strong>Check backend:</strong> Visit <a href="http://localhost:8000/api/v1/health" target="_blank">http://localhost:8000/api/v1/health</a></li>
+            <li><strong>Reload extension:</strong> Go to <code>chrome://extensions/</code> and click the reload icon</li>
+            <li><strong>Reload this page:</strong> Press F5 to refresh</li>
+            <li><strong>Check console:</strong> Press F12 and look for errors in the Console tab</li>
+        </ol>
+
+        <h3>If nothing happens when scanning:</h3>
+        <ol>
+            <li><strong>Open extension DevTools:</strong> Right-click extension icon → Inspect popup</li>
+            <li><strong>Check for errors</strong> in the Console</li>
+            <li><strong>Verify content script loaded:</strong> Should see "VeriFy Deepfake Detector: Content script loaded" in page console</li>
+        </ol>
+    </div>
+
+    <!-- Footer -->
+    <div class="section" style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <h2 style="color: white; border: none;">🛡️ VeriFy AI Deepfake Detector</h2>
+        <p>Protecting truth in the age of AI-generated content</p>
+        <p style="font-size: 14px; opacity: 0.9;">
+            Powered by RoBERTa • EfficientNetV2-S • Xception • Wav2Vec2 • Gemini 2.0 Flash
+        </p>
+    </div>
+
+</body>
+</html>

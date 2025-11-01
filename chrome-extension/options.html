@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VeriFy Settings</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+    }
+
+    .setting-label {
+      flex: 1;
+    }
+
+    .setting-label h3 {
+      font-size: 15px;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .setting-label p {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.4;
+    }
+
+    /* Toggle Switch */
+    .toggle {
+      position: relative;
+      width: 50px;
+      height: 26px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.3s;
+      border-radius: 26px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background-color: #667eea;
+    }
+
+    .toggle input:checked + .toggle-slider:before {
+      transform: translateX(24px);
+    }
+
+    /* Input */
+    .input-group {
+      margin-top: 10px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    /* Button */
+    .btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #666;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+      box-shadow: none;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    /* Status Message */
+    .status-message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .status-message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status-message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .info-box strong {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚙️ Settings</h1>
+    <p class="subtitle">Configure VeriFy AI Deepfake Detector</p>
+
+    <!-- General Settings -->
+    <div class="section">
+      <div class="section-title">General</div>
+      
+      <div class="setting-item">
+        <div class="setting-label">
+          <h3>Auto-Scan Pages</h3>
+          <p>Automatically scan pages when they load</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autoScan">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <h3>Show Notifications</h3>
+          <p>Display browser notifications for scan results</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="notifications">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <h3>Highlight Fake Content</h3>
+          <p>Visually highlight detected fake content on pages</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="highlightContent" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- API Settings -->
+    <div class="section">
+      <div class="section-title">API Configuration</div>
+      
+      <div class="input-group">
+        <label for="apiUrl">Backend API URL</label>
+        <input 
+          type="text" 
+          id="apiUrl" 
+          placeholder="http://localhost:8000/api/v1"
+          value="http://localhost:8000/api/v1"
+        >
+      </div>
+
+      <div class="info-box" style="margin-top: 15px;">
+        <strong>📡 Backend Status:</strong> Make sure your backend server is running at the specified URL. 
+        Default: <code>http://localhost:8000/api/v1</code>
+      </div>
+    </div>
+
+    <!-- Advanced Settings -->
+    <div class="section">
+      <div class="section-title">Advanced</div>
+      
+      <div class="setting-item">
+        <div class="setting-label">
+          <h3>Confidence Threshold</h3>
+          <p>Minimum confidence level to flag content (50-95%)</p>
+        </div>
+        <input 
+          type="range" 
+          id="confidenceThreshold" 
+          min="50" 
+          max="95" 
+          value="70"
+          style="width: 120px;"
+        >
+        <span id="confidenceValue" style="font-weight: 600; color: #667eea;">70%</span>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <h3>Max Items to Scan</h3>
+          <p>Maximum number of items to analyze per page</p>
+        </div>
+        <input 
+          type="number" 
+          id="maxItems" 
+          min="5" 
+          max="50" 
+          value="20"
+          style="width: 80px; padding: 6px; border: 2px solid #e0e0e0; border-radius: 6px;"
+        >
+      </div>
+    </div>
+
+    <!-- Status Message -->
+    <div id="statusMessage" class="status-message"></div>
+
+    <!-- Buttons -->
+    <div class="button-group">
+      <button class="btn" id="saveButton">💾 Save Settings</button>
+      <button class="btn btn-secondary" id="resetButton">↺ Reset to Defaults</button>
+    </div>
+
+    <!-- Info -->
+    <div class="info-box" style="margin-top: 30px;">
+      <strong>🚀 About VeriFy:</strong> Powered by state-of-the-art AI models including RoBERTa, 
+      EfficientNetV2-S, Xception, and Wav2Vec2. All detections are verified by Gemini 2.0 Flash 
+      for maximum accuracy.
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

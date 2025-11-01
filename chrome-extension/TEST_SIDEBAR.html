@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Comet Sidebar - VeriFy</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-article {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+    p {
+      line-height: 1.8;
+      color: #34495e;
+      margin-bottom: 20px;
+    }
+    .fake-text {
+      background: #fff3cd;
+      padding: 15px;
+      border-left: 4px solid #ffc107;
+      margin: 20px 0;
+    }
+    .instructions {
+      background: #d1ecf1;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border-left: 4px solid #17a2b8;
+    }
+    .instructions h3 {
+      margin-top: 0;
+      color: #0c5460;
+    }
+    .instructions ol {
+      margin: 10px 0;
+    }
+    .instructions li {
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="instructions">
+    <h3>📋 Test Instructions</h3>
+    <ol>
+      <li><strong>Hard Reload Extension:</strong>
+        <ul>
+          <li>Go to <code>chrome://extensions/</code></li>
+          <li>Find "VeriFy" extension</li>
+          <li>Toggle it <strong>OFF</strong> → Wait 2 sec → Toggle <strong>ON</strong></li>
+          <li>Click the 🔄 <strong>Reload</strong> button</li>
+        </ul>
+      </li>
+      <li><strong>Close this tab and reopen it</strong> (fresh start)</li>
+      <li><strong>Wait 5 seconds</strong> - auto-scan will run</li>
+      <li><strong>Expected:</strong> Beautiful sidebar slides in from RIGHT side! 🎉</li>
+    </ol>
+    <p><strong>If you still see old alert box:</strong> Check DevTools Console (F12) for errors</p>
+  </div>
+
+  <div class="test-article">
+    <h1>🧪 Test Article for Sidebar Detection</h1>
+    
+    <p>This is a normal paragraph with legitimate information. Climate change is a pressing global issue that requires immediate attention. Scientists worldwide are working on sustainable solutions to reduce carbon emissions and protect our planet.</p>
+
+    <div class="fake-text">
+      <p><strong>⚠️ FAKE TEXT #1:</strong> The Earth is actually flat and all space agencies are lying to us. This has been proven by numerous independent researchers who discovered that the horizon never curves no matter how high you go.</p>
+    </div>
+
+    <p>Real news: Technology companies are investing billions in renewable energy infrastructure. Major corporations have committed to achieving carbon neutrality by 2030, with many already implementing solar and wind power solutions.</p>
+
+    <div class="fake-text">
+      <p><strong>⚠️ FAKE TEXT #2:</strong> Virat Kohli has been secretly playing for Pakistan cricket team since 2020 under a false identity. Sources reveal he has been receiving millions in payment from both countries simultaneously.</p>
+    </div>
+
+    <p>In other news: The United Nations recently held a climate summit where world leaders discussed strategies for environmental protection. Over 150 countries have signed new agreements to reduce plastic waste and promote sustainable development.</p>
+
+    <p>This test page contains two obvious fake statements that should be detected by the VeriFy AI system. When the auto-scan runs (after 5 seconds), you should see:</p>
+    
+    <ul>
+      <li>✅ Comet-style sidebar sliding in from the RIGHT</li>
+      <li>✅ Purple gradient header with "VeriFy Assistant"</li>
+      <li>✅ "2 issues detected" subtitle</li>
+      <li>✅ Two white interactive cards (one for each fake text)</li>
+      <li>✅ Each card shows: type, confidence %, preview, "Show on page" button</li>
+      <li>✅ Footer with "Dismiss" and "View Full Report" buttons</li>
+      <li>✅ Floating toggle button on right edge with badge "2"</li>
+    </ul>
+
+    <p><strong>Test the interactions:</strong></p>
+    <ul>
+      <li>Click a card → page scrolls to that fake content</li>
+      <li>Hover over cards → blue border appears</li>
+      <li>Click [×] or [Dismiss] → sidebar slides out</li>
+      <li>Click toggle button → sidebar slides back in</li>
+    </ul>
+  </div>
+
+  <script>
+    console.log('🧪 TEST PAGE LOADED');
+    console.log('📊 This page contains 2 fake texts for detection');
+    console.log('⏱️ Auto-scan will start in 5 seconds...');
+    console.log('🎯 Expected: Comet sidebar should slide in from RIGHT');
+    
+    // Log when content script loads
+    setTimeout(() => {
+      console.log('🔍 Checking for sidebar element...');
+      const sidebar = document.querySelector('.verify-comet-sidebar');
+      if (sidebar) {
+        console.log('✅ SIDEBAR FOUND! Check if it has "verify-comet-visible" class');
+        console.log('Sidebar classes:', sidebar.className);
+      } else {
+        console.log('❌ NO SIDEBAR YET - waiting for auto-scan...');
+      }
+    }, 6000);
+
+    // Check again after 10 seconds
+    setTimeout(() => {
+      console.log('🔍 Final check...');
+      const sidebar = document.querySelector('.verify-comet-sidebar');
+      if (sidebar) {
+        console.log('✅ SUCCESS! Sidebar element exists');
+        console.log('Is visible:', sidebar.classList.contains('verify-comet-visible'));
+      } else {
+        console.log('❌ PROBLEM: Sidebar not created');
+        console.log('Check if extension is loaded: chrome://extensions/');
+        console.log('Make sure backend is running: http://localhost:8000/api/v1/health');
+      }
+    }, 12000);
+  </script>
+</body>
+</html>

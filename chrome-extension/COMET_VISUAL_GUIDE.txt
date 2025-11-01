@@ -1,0 +1,305 @@
+
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║         🤖 NOW WORKS LIKE PERPLEXITY COMET! 🤖           ║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
+
+┌─ WHAT CHANGED ───────────────────────────────────────────┐
+│                                                           │
+│  ❌ OLD: Blocking alert box in center                    │
+│  ✅ NEW: Non-intrusive sidebar from right                │
+│                                                           │
+│  Just like Perplexity's Comet assistant!                 │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+
+┌─ VISUAL COMPARISON ──────────────────────────────────────┐
+│                                                           │
+│  BEFORE:                                                  │
+│  ┌─────────────────────────┐                             │
+│  │  ⚠️ Alert Box           │  ← Blocks content           │
+│  │  (covers page)          │                             │
+│  │  [Got it]               │                             │
+│  └─────────────────────────┘                             │
+│                                                           │
+│  AFTER:                                                   │
+│  Page Content           ┌────────────────────┐           │
+│  (still readable)       │ 🛡️ VeriFy          │ ← Sidebar │
+│                         │ 2 issues       [×] │           │
+│  Article text...        ├────────────────────┤           │
+│                         │                    │           │
+│  More content...        │ ⚠️ 2 fake items    │           │
+│                         │                    │           │
+│  No blocking!           │ 📄 Text      95%   │           │
+│                         │ 🖼️ Image     88%   │           │
+│                         │                    │           │
+│                         │ [Dismiss] [Report] │           │
+│                         └────────────────────┘           │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+
+┌─ KEY FEATURES ───────────────────────────────────────────┐
+│                                                           │
+│  ✅ Slides in from right (smooth animation)              │
+│  ✅ Doesn't block page content                           │
+│  ✅ Beautiful purple gradient header                     │
+│  ✅ White cards for each issue                           │
+│  ✅ Click cards to jump to content                       │
+│  ✅ Toggle button when hidden                            │
+│  ✅ Badge shows count at a glance                        │
+│  ✅ Non-intrusive design                                 │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+
+┌─ HOW IT WORKS ───────────────────────────────────────────┐
+│                                                           │
+│  1. You open any webpage                                  │
+│  2. Extension auto-scans (background)                     │
+│  3. If fake content found:                                │
+│     → Sidebar slides in from right                        │
+│     → Shows list of issues                                │
+│     → Badge appears on toggle button                      │
+│  4. You click an item:                                    │
+│     → Page scrolls to it                                  │
+│     → Red border highlights it                            │
+│  5. When done:                                            │
+│     → Click [×] or [Dismiss]                              │
+│     → Sidebar slides out                                  │
+│     → Toggle button remains                               │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+
+┌─ SIDEBAR ANATOMY ────────────────────────────────────────┐
+│                                                           │
+│  ┌────────────────────────────────────────┐              │
+│  │ HEADER (Purple gradient)               │              │
+│  │ 🛡️ VeriFy Assistant            [×]     │              │
+│  │    2 issues detected                   │              │
+│  ├────────────────────────────────────────┤              │
+│  │ CONTENT (Scrollable)                   │              │
+│  │                                         │              │
+│  │ ⚠️ I found 2 potentially fake items    │              │
+│  │   on this page. Let me show you...     │              │
+│  │                                         │              │
+│  │ ┌───────────────────────────────────┐  │              │
+│  │ │ CARD 1 (Clickable)                │  │              │
+│  │ │ 📄 Text                      95% │  │              │
+│  │ │ "Scientists discover..."          │  │              │
+│  │ │                 [📍 Show on page] │  │              │
+│  │ └───────────────────────────────────┘  │              │
+│  │                                         │              │
+│  │ ┌───────────────────────────────────┐  │              │
+│  │ │ CARD 2 (Clickable)                │  │              │
+│  │ │ 🖼️ Image                     88% │  │              │
+│  │ │ Click to highlight on page        │  │              │
+│  │ │                 [📍 Show on page] │  │              │
+│  │ └───────────────────────────────────┘  │              │
+│  │                                         │              │
+│  │ 💡 Tip: Click items to jump to them    │              │
+│  │                                         │              │
+│  ├────────────────────────────────────────┤              │
+│  │ FOOTER (Action buttons)                │              │
+│  │ [Dismiss]      [View Full Report]      │              │
+│  └────────────────────────────────────────┘              │
+│                                                           │
+│  TOGGLE BUTTON (when hidden):                            │
+│     ┌───┐                                                │
+│     │🛡️│ ← Floating, pulses                             │
+│     │(2)│ ← Badge with count                             │
+│     └───┘                                                │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+
+┌─ INTERACTIONS ───────────────────────────────────────────┐
+│                                                           │
+│  To Open Sidebar:                                         │
+│  • Automatically when fake content detected               │
+│  • Click toggle button when hidden                        │
+│                                                           │
+│  To Navigate:                                             │
+│  • Click any card → scrolls to that content               │
+│  • Click "Show on page" → same action                     │
+│  • Red border highlights the item                         │
+│                                                           │
+│  To Close Sidebar:                                        │
+│  • Click [×] in header                                    │
+│  • Click [Dismiss] in footer                              │
+│  • Sidebar slides out smoothly                            │
+│                                                           │
+│  To Reopen:                                               │
+│  • Click toggle button                                    │
+│  • Sidebar slides back in                                 │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+
+┌─ DESIGN DETAILS ─────────────────────────────────────────┐
+│                                                           │
+│  Colors:                                                  │
+│  • Header: Purple gradient (#667eea → #764ba2)           │
+│  • Cards: White with subtle shadow                        │
+│  • Background: Light gray (#f8f9fa)                       │
+│  • Confidence: Red gradient (#ff4757 → #ff6b7a)          │
+│  • Hover: Blue border (#667eea)                          │
+│                                                           │
+│  Dimensions:                                              │
+│  • Width: 400px (desktop), 100% (mobile)                 │
+│  • Height: Full viewport                                  │
+│  • Position: Fixed right                                  │
+│  • Z-index: Maximum (above everything)                    │
+│                                                           │
+│  Animations:                                              │
+│  • Slide in/out: 0.4s cubic-bezier                       │
+│  • Toggle pulse: 2s infinite                              │
+│  • Card hover: 0.2s ease                                  │
+│  • All smooth and polished                                │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+
+┌─ MOBILE RESPONSIVE ──────────────────────────────────────┐
+│                                                           │
+│  Desktop (>768px):                                        │
+│  • Sidebar: 400px width                                   │
+│  • Doesn't block content                                  │
+│  • Hover effects active                                   │
+│                                                           │
+│  Mobile (<768px):                                         │
+│  • Sidebar: Full width (100%)                             │
+│  • Overlay style                                          │
+│  • Touch-optimized                                        │
+│  • Swipe to dismiss                                       │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+
+┌─ COMPARISON TO PERPLEXITY COMET ─────────────────────────┐
+│                                                           │
+│  Perplexity Comet Features:                               │
+│  ✅ Sidebar from right                                    │
+│  ✅ Non-intrusive                                         │
+│  ✅ Clean design                                          │
+│  ✅ Interactive cards                                     │
+│  ✅ Toggle button                                         │
+│                                                           │
+│  VeriFy Assistant Features:                               │
+│  ✅ Sidebar from right                                    │
+│  ✅ Non-intrusive                                         │
+│  ✅ Clean design                                          │
+│  ✅ Interactive cards                                     │
+│  ✅ Toggle button                                         │
+│  ➕ Confidence scores                                     │
+│  ➕ Direct page navigation                                │
+│  ➕ Red highlighting                                      │
+│  ➕ Real-time scanning                                    │
+│                                                           │
+│  → Same great UX, plus extra features!                    │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+
+┌─ USE CASES ──────────────────────────────────────────────┐
+│                                                           │
+│  Scenario 1: Reading Article                              │
+│  1. Open news article                                     │
+│  2. Continue reading (sidebar doesn't block!)             │
+│  3. Sidebar shows 2 issues                                │
+│  4. Click first issue                                     │
+│  5. Page scrolls to it                                    │
+│  6. See red highlight                                     │
+│  7. Read both issues                                      │
+│  8. Dismiss sidebar                                       │
+│  9. Continue informed reading                             │
+│                                                           │
+│  Scenario 2: Quick Check                                  │
+│  1. Open page                                             │
+│  2. See toggle button with badge (3)                      │
+│  3. Click toggle                                          │
+│  4. Quick scan of 3 issues                                │
+│  5. Dismiss immediately                                   │
+│  6. Badge still shows count                               │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+
+╔═══════════════════════════════════════════════════════════╗
+║                    🚀 QUICK START                         ║
+╚═══════════════════════════════════════════════════════════╝
+
+  STEP 1: Reload Extension
+  → Open: chrome://extensions/
+  → Find: VeriFy - AI Deepfake Detector
+  → Click: 🔄 Reload button
+
+  STEP 2: Test It
+  → Open: test-page.html in Chrome
+  → Wait: 5 seconds for auto-scan
+  → See: Beautiful sidebar slides in!
+
+  STEP 3: Interact
+  → Click: Any card to jump to content
+  → Watch: Smooth scroll to highlighted item
+  → Test: Close and reopen with toggle
+
+  STEP 4: Browse Normally
+  → Visit any website
+  → Extension works automatically
+  → Sidebar appears only when needed
+  → Non-intrusive, just like Comet!
+
+┌─ WHAT TO EXPECT ─────────────────────────────────────────┐
+│                                                           │
+│  On Clean Page (e.g., Wikipedia):                        │
+│  • Scans automatically                                    │
+│  • Finds no issues                                        │
+│  • Shows: "✅ Page looks good!"                          │
+│  • No sidebar appears                                     │
+│  • Seamless experience                                    │
+│                                                           │
+│  On Page with Fake Content (e.g., News):                 │
+│  • Scans automatically (15-30 sec)                        │
+│  • Finds 2 fake items                                     │
+│  • Sidebar slides in smoothly                             │
+│  • Shows: "⚠️ 2 issues detected"                         │
+│  • Lists both items with details                          │
+│  • Toggle button shows badge (2)                          │
+│  • Click items to review them                             │
+│  • Dismiss when done                                      │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+
+┌─ TROUBLESHOOTING ────────────────────────────────────────┐
+│                                                           │
+│  Sidebar not appearing?                                   │
+│  • Check: Extension auto-scan enabled in settings         │
+│  • Check: Backend running (localhost:8000)                │
+│  • Try: Open test-page.html first                         │
+│  • Wait: 5-10 seconds for first scan                      │
+│                                                           │
+│  Toggle button not visible?                               │
+│  • Check: Page has fake content?                          │
+│  • Check: Sidebar was dismissed?                          │
+│  • Look: Right edge of screen                             │
+│  • Wait: For auto-scan to complete                        │
+│                                                           │
+│  Cards not clickable?                                     │
+│  • Check: Content highlighted on page?                    │
+│  • Try: Click "Show on page" button                       │
+│  • Check: Page scrollable?                                │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+
+╔═══════════════════════════════════════════════════════════╗
+║         🎉 YOUR EXTENSION NOW LOOKS AND FEELS             ║
+║            LIKE PERPLEXITY'S COMET ASSISTANT!             ║
+╚═══════════════════════════════════════════════════════════╝
+
+Benefits:
+✅ Non-intrusive - doesn't block content
+✅ Beautiful design - professional and polished
+✅ Interactive - click to navigate
+✅ Smart - appears only when needed
+✅ Familiar - same UX as Perplexity Comet
+
+Just reload the extension and experience it! 🚀
+
+📚 Documentation:
+   • COMET_STYLE_GUIDE.md - Complete guide
+   • AUTO_SCAN_GUIDE.md - Auto-scan details
+

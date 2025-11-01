@@ -21,7 +21,7 @@ const contentTypes = [
   { id: 'url' as ContentType, label: 'URL', icon: Link },
 ];
 
-export function AnalyzePageWithDragDrop({ language }: { language: string }) {
+export function AnalyzePageWithDragDrop({ language: _language }: { language: string }) {
   const [activeType, setActiveType] = useState<ContentType>('image');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);

@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { User, Mail, Calendar, Award, TrendingUp, CheckCircle, Settings } from 'lucide-react';
+import { Calendar, Award, TrendingUp, CheckCircle, Settings } from 'lucide-react';
 import { Card } from './ui/card';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Badge } from './ui/badge';

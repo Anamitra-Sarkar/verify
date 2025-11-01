@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Moon, Sun, Menu, X, Globe, User, LogOut, Settings } from 'lucide-react';
+import { Moon, Sun, Menu, X, Globe, User } from 'lucide-react';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { GoogleProfileMenu } from './GoogleProfileMenu';
@@ -10,7 +10,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from './ui/dropdown-menu';
 
 interface HeaderProps {

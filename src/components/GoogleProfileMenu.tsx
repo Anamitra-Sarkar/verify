@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   User, Settings, LogOut, Camera, Plus, 
-  Shield, HelpCircle, ChevronRight, ExternalLink,
-  Bell, Lock, Globe, Palette
+  Shield, ChevronRight,
+  Bell, Globe, Palette
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -45,19 +45,16 @@ const getUserInitials = (user: any) => {
   return name.substring(0, 2).toUpperCase();
 };
 
-export function GoogleProfileMenu({ user, onNavigate, onLogout, onClose, onThemeToggle, onLanguageChange, isDark }: GoogleProfileMenuProps) {
+export function GoogleProfileMenu({ user, onNavigate, onLogout, onClose, onThemeToggle, onLanguageChange: _onLanguageChange, isDark }: GoogleProfileMenuProps) {
   const [showAvatarUpload, setShowAvatarUpload] = useState(false);
-  const [showAddAccount, setShowAddAccount] = useState(false);
 
   const gradient = generateAvatarGradient(user?.uid || user?.id || user?.email || 'default');
   const userName = user?.displayName || user?.name || 'User';
   const userEmail = user?.email || 'user@example.com';
 
   const handleAddAccount = () => {
-    setShowAddAccount(true);
     // In a real app, this would open Google account picker
     alert('Add Account feature:\n\nIn production, this would:\n- Open Google account picker\n- Allow switching between accounts\n- Support multiple user sessions');
-    setShowAddAccount(false);
   };
 
   const handleManageAccount = () => {

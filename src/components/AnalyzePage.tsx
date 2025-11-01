@@ -15,7 +15,7 @@ interface AnalyzePageProps {
 
 type Verdict = 'true' | 'fake' | 'deepfake' | 'unverified' | null;
 
-export function AnalyzePage({ language }: AnalyzePageProps) {
+export function AnalyzePage({ language: _language }: AnalyzePageProps) {
   const [analyzing, setAnalyzing] = useState(false);
   const [verdict, setVerdict] = useState<Verdict>(null);
   const [confidence, setConfidence] = useState(0);

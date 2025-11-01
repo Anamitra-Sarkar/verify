@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion } from 'motion/react';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import {
   Dialog,

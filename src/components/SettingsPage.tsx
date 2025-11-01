@@ -60,9 +60,9 @@ interface SettingsPageProps {
 
 export function SettingsPage({ 
   user: propUser, 
-  onThemeToggle,
+  onThemeToggle: _onThemeToggle,
   onLanguageChange,
-  isDark = false,
+  isDark: _isDark = false,
   currentLanguage = 'en'
 }: SettingsPageProps) {
   const { user: authUser } = useAuth();

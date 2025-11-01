@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 
-export function AnimatedHeroText({ language }: { language: string }) {
+export function AnimatedHeroText({ language: _language }: { language: string }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const taglines = [

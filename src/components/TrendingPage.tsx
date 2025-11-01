@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { TrendingUp, MapPin, Clock, Users, AlertCircle, Eye, Loader2 } from 'lucide-react';
+import { TrendingUp, MapPin, Clock, AlertCircle, Eye, Loader2 } from 'lucide-react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
@@ -54,7 +54,7 @@ const regionalHotspots = [
   { region: 'Gujarat', count: 1204, intensity: 55 },
 ];
 
-export function TrendingPage({ language }: TrendingPageProps) {
+export function TrendingPage({ language: _language }: TrendingPageProps) {
   const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -273,7 +273,7 @@ export function TrendingPage({ language }: TrendingPageProps) {
             <Card className="glass-card p-6">
               <h4 className="mb-4">Top Categories</h4>
               <div className="space-y-3">
-                {['Politics', 'Health', 'Technology', 'Entertainment'].map((category, idx) => (
+                {['Politics', 'Health', 'Technology', 'Entertainment'].map((category) => (
                   <div key={category} className="flex items-center justify-between">
                     <span className="text-sm">{category}</span>
                     <Badge variant="outline">{Math.floor(Math.random() * 3000) + 500}</Badge>

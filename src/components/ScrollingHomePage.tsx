@@ -1,9 +1,9 @@
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'motion/react';
 import { useRef, useEffect, useState } from 'react';
 import { 
-  Shield, Zap, Globe, Users, TrendingUp, Lock,
+  Shield, Zap, Globe, Users, TrendingUp,
   Sparkles, ArrowRight, CheckCircle2, Star,
-  Eye, FileCheck, Video, Image as ImageIcon, Mic,
+  FileCheck, Video, Image as ImageIcon, Mic,
   Chrome, Download, Scan, Rocket
 } from 'lucide-react';
 import { Button } from './ui/button';

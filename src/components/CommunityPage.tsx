@@ -235,7 +235,7 @@ const recentDiscussions = [
   },
 ];
 
-export function CommunityPage({ language }: CommunityPageProps) {
+export function CommunityPage({ language: _language }: CommunityPageProps) {
   const { user } = useAuth();
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [userStats, setUserStats] = useState<UserStats | null>(null);

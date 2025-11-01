@@ -18,14 +18,13 @@ interface AnalysisHistory {
   timestamp: number;
 }
 
-export function AnalyzePage({ language }: { language: string }) {
+export function AnalyzePage({ language: _language }: { language: string }) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'text' | 'image' | 'video' | 'audio'>('text');
   const [textInput, setTextInput] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [history, setHistory] = useState<AnalysisHistory[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
   
   const { loading, result, error, checkText, checkImage, checkVideo, checkVoice, reset } = useDetection();
   
@@ -338,7 +337,7 @@ export function AnalyzePage({ language }: { language: string }) {
                         </p>
                         <Button
                           variant="outline"
-                          onClick={(e) => {
+                          onClick={(e: React.MouseEvent) => {
                             e.stopPropagation();
                             setSelectedFile(null);
                             if (fileInputRef.current) {

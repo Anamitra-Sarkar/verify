@@ -366,24 +366,6 @@ export function TrendingPage({ language }: TrendingPageProps) {
                 </motion.div>
               );
             })}
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      <span>{story.timeAgo}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Eye className="w-4 h-4" />
-                      <span>{story.engagement}</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <button className="text-sm text-blue-600 hover:text-blue-700">
-                      View Details →
-                    </button>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
           </div>
         </motion.div>
       </div>

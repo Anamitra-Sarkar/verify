@@ -1449,6 +1449,7 @@ async def check_voice(file: UploadFile = File(...)):
                 # Simple heuristics
                 is_fake = False
                 confidence = 0.60
+                reasoning = "Basic audio property analysis"
                 
                 # Check for unnatural patterns
                 if duration < 0.5:

@@ -113,7 +113,7 @@ async def analyze_text_content(text: str) -> dict:
             return response.json()
     except Exception as e:
         logger.error(f"Failed to analyze text: {str(e)}")
-        return {"error": str(e)}
+        return {"error": "Analysis failed"}
 
 
 async def analyze_image_content(image_url: str) -> dict:
@@ -136,7 +136,7 @@ async def analyze_image_content(image_url: str) -> dict:
             return analysis_response.json()
     except Exception as e:
         logger.error(f"Failed to analyze image: {str(e)}")
-        return {"error": str(e)}
+        return {"error": "Analysis failed"}
 
 
 def format_analysis_result(result: dict) -> str:

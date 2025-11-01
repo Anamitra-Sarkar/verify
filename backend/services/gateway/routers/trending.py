@@ -6,9 +6,14 @@ from pydantic import BaseModel
 from typing import List
 from datetime import datetime
 import os
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -111,7 +116,7 @@ async def get_trending_topics(limit: int = 10):
                             break
                             
             except Exception as e:
-                print(f"Error searching for '{query}': {str(e)}")
+                logger.error(f"Error searching for '{query}': {str(e)}")
                 continue
             
             if len(trending_topics) >= limit:
@@ -128,8 +133,8 @@ async def get_trending_topics(limit: int = 10):
         )
         
     except Exception as e:
-        print(f"Error fetching trending topics: {str(e)}")
+        logger.error(f"Error fetching trending topics: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail=f"Error fetching trending topics: {str(e)}"
+            detail="Error fetching trending topics"
         )

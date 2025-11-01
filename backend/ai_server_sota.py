@@ -68,8 +68,11 @@ from torchvision import transforms
 print("✅ torchvision transforms imported")
 
 # Delay transformers import to avoid scipy conflicts
-fake_news_detector = None
-print("\n📚 Text Fake News Detector will be loaded on first use...")
+fake_news_detector_liar = None  # For political fake news
+fake_news_detector_fact_check = None  # For fact-checking
+print("\n📚 Text Fake News Detectors will be loaded on first use...")
+print("   - Arko007/fake-news-liar-political (for political content)")
+print("   - Arko007/fact-check1-v3-final (for general fact-checking)")
 
 # Tavily API for fact-checking
 print("\n🌐 Initializing Tavily API...")
@@ -355,9 +358,11 @@ print("\n🎤 Voice Deepfake Detector will be loaded on first use...")
 print("\n" + "="*60)
 print("📊 MODEL LOADING SUMMARY")
 print("="*60)
-print(f"✅ Text Detector (RoBERTa): ⏳ Lazy-loaded (loads on first use)")
+print(f"✅ Text Detectors: ⏳ Lazy-loaded (loads on first use)")
+print(f"   - Arko007/fake-news-liar-political")
+print(f"   - Arko007/fact-check1-v3-final")
 print(f"✅ Tavily Fact-Check API: {'✅ Ready' if tavily else '❌ Not ready'}")
-print(f"🧠 Gemini 2.0 Flash Backup: {'✅ Ready' if gemini_model else '❌ Not ready'}")
+print(f"🔒 AI Cross-Verification: {'✅ Ready' if gemini_model else '❌ Not ready'}")
 print(f"🖼️ Image Detector (EfficientNetV2-S): {'✅ Loaded' if image_detector_model else '❌ Not loaded'}")
 print(f"🎥 Video Detector (DFD-SOTA): {'✅ Loaded' if video_detector_model else '❌ Not loaded'}")
 print(f"🎤 Voice Detector (SOTA): ⏳ Lazy-loaded (Wav2Vec2+BiGRU+Attention, 98.5M params)")
@@ -383,24 +388,39 @@ class CheckResponse(BaseModel):
 # Helper Functions
 # ============================================
 
-def load_text_detector():
-    """Lazy load text detector to avoid scipy conflicts at startup"""
-    global fake_news_detector
-    if fake_news_detector is None:
+def load_text_detectors():
+    """Lazy load text detectors to avoid scipy conflicts at startup"""
+    global fake_news_detector_liar, fake_news_detector_fact_check
+    
+    if fake_news_detector_liar is None or fake_news_detector_fact_check is None:
         try:
-            print("\n📚 Loading Text Fake News Detector (RoBERTa)...")
             from transformers import pipeline
-            fake_news_detector = pipeline(
-                "text-classification",
-                model="hamzab/roberta-fake-news-classification",
-                tokenizer="hamzab/roberta-fake-news-classification",
-                framework="pt"
-            )
-            print("✅ Text Detector (RoBERTa): LOADED (500MB, 85-90% accuracy)")
+            
+            if fake_news_detector_liar is None:
+                print("\n📚 Loading Political Fake News Detector (Arko007/fake-news-liar-political)...")
+                fake_news_detector_liar = pipeline(
+                    "text-classification",
+                    model="Arko007/fake-news-liar-political",
+                    tokenizer="Arko007/fake-news-liar-political",
+                    framework="pt"
+                )
+                print("✅ Political Fake News Detector: LOADED")
+            
+            if fake_news_detector_fact_check is None:
+                print("\n📚 Loading Fact-Check Detector (Arko007/fact-check1-v3-final)...")
+                fake_news_detector_fact_check = pipeline(
+                    "text-classification",
+                    model="Arko007/fact-check1-v3-final",
+                    tokenizer="Arko007/fact-check1-v3-final",
+                    framework="pt"
+                )
+                print("✅ Fact-Check Detector: LOADED")
+                
         except Exception as e:
-            print(f"❌ Text Detector: FAILED - {str(e)}")
+            print(f"❌ Text Detectors: FAILED - {str(e)}")
             raise
-    return fake_news_detector
+    
+    return fake_news_detector_liar, fake_news_detector_fact_check
 
 def load_voice_detector():
     """Lazy load SOTA voice detector to avoid scipy conflicts at startup"""
@@ -610,13 +630,13 @@ def analyze_video_with_sota(video_bytes: bytes) -> dict:
 
 
 # ============================================
-# Gemini Backup Verification Functions
+# AI Cross-Verification Functions (Internal Only - Not Exposed to Users)
 # ============================================
 
 def verify_with_gemini_text(text: str, model_prediction: bool, model_confidence: float, tavily_sources: str = "") -> dict:
-    """Use Gemini to intelligently verify text with context awareness"""
+    """Use AI to cross-verify text with context awareness (internal use only)"""
     if not gemini_model:
-        return {"override": False, "gemini_verdict": None, "should_check": False}
+        return {"override": False, "ai_verdict": None, "should_check": False}
     
     try:
         # Enhanced prompt with temporal awareness and fact-checking
@@ -643,15 +663,15 @@ Be extremely precise about current facts vs historical facts."""
         response_text = response.text.strip().replace('```json', '').replace('```', '')
         gemini_result = json.loads(response_text)
         
-        print(f"\n🧠 Gemini Analysis:")
+        print(f"\n🔒 AI Cross-Verification:")
         print(f"   Verdict: {'FAKE' if gemini_result['is_fake'] else 'REAL'}")
         print(f"   Confidence: {gemini_result['confidence']:.1%}")
         print(f"   Reasoning: {gemini_result['reasoning'][:100]}...")
         
-        # Return Gemini's verdict for the priority system to use
+        # Return AI's verdict for the priority system to use
         return {
             "override": False,  # Don't auto-override, let priority system decide
-            "gemini_verdict": "FAKE" if gemini_result["is_fake"] else "REAL",
+            "ai_verdict": "FAKE" if gemini_result["is_fake"] else "REAL",
             "is_fake": gemini_result["is_fake"],
             "confidence": gemini_result["confidence"],
             "reasoning": gemini_result["reasoning"],
@@ -660,14 +680,14 @@ Be extremely precise about current facts vs historical facts."""
         }
     
     except Exception as e:
-        print(f"⚠️ Gemini verification failed: {str(e)}")
-        return {"override": False, "gemini_verdict": None, "should_check": False}
+        print(f"⚠️ AI cross-verification failed: {str(e)}")
+        return {"override": False, "ai_verdict": None, "should_check": False}
 
 
 def verify_with_gemini_image(image_bytes: bytes, model_prediction: bool, model_confidence: float) -> dict:
-    """Use Gemini to verify image analysis - only if predicted as FAKE"""
+    """Use AI to cross-verify image analysis (internal use only)"""
     if not gemini_model or not model_prediction:  # Only check if model says it's FAKE
-        return {"override": False, "gemini_verdict": None}
+        return {"override": False, "ai_verdict": None}
     
     try:
         # Upload image to Gemini
@@ -909,20 +929,34 @@ async def check_text(request: TextCheckRequest):
         # Get predictions from all available models
         predictions = []
         
-        # 1. RoBERTa Model
+        # 1. Political Fake News Detector (Arko007/fake-news-liar-political)
+        # 2. Fact-Check Detector (Arko007/fact-check1-v3-final)
         try:
-            detector = load_text_detector()
-            result = detector(request.text)[0]
-            model_score = result['score']
-            model_is_fake = 'FAKE' in result['label'].upper()
+            liar_detector, fact_detector = load_text_detectors()
+            
+            # Use political detector first
+            liar_result = liar_detector(request.text[:512])[0]
+            liar_score = liar_result['score']
+            liar_is_fake = 'FAKE' in liar_result['label'].upper() or 'FALSE' in liar_result['label'].upper()
             predictions.append({
-                'model': 'RoBERTa',
-                'is_fake': model_is_fake,
-                'confidence': model_score
+                'model': 'Political-LIAR',
+                'is_fake': liar_is_fake,
+                'confidence': liar_score
             })
-            print(f"   RoBERTa: {'FAKE' if model_is_fake else 'REAL'} ({model_score:.1%})")
+            print(f"   Political-LIAR: {'FAKE' if liar_is_fake else 'REAL'} ({liar_score:.1%})")
+            
+            # Use fact-check detector
+            fact_result = fact_detector(request.text[:512])[0]
+            fact_score = fact_result['score']
+            fact_is_fake = 'FAKE' in fact_result['label'].upper() or 'FALSE' in fact_result['label'].upper()
+            predictions.append({
+                'model': 'Fact-Check',
+                'is_fake': fact_is_fake,
+                'confidence': fact_score
+            })
+            print(f"   Fact-Check: {'FAKE' if fact_is_fake else 'REAL'} ({fact_score:.1%})")
         except Exception as e:
-            print(f"   RoBERTa failed: {str(e)}")
+            print(f"   Text models failed: {str(e)}")
         
         # 2. SMART Web Analysis using Tavily results (PRIMARY METHOD)
         web_verification = None

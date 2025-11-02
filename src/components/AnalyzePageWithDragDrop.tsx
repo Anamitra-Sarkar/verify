@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
+import { API_CONFIG } from '../config/api';
 
 type ContentType = 'text' | 'image' | 'video' | 'voice' | 'url';
 
@@ -32,7 +33,7 @@ const contentTypes = [
   { id: 'url' as ContentType, label: 'URL', icon: Link },
 ];
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = `${API_CONFIG.BASE_URL}/api`;
 
 export function AnalyzePageWithDragDrop({ language }: { language: string }) {
   const [activeType, setActiveType] = useState<ContentType>('image');

@@ -13,7 +13,7 @@ function loadSettings() {
     document.getElementById('autoScan').checked = result.autoScan || false;
     document.getElementById('notifications').checked = result.notificationsEnabled !== false;
     document.getElementById('highlightContent').checked = result.highlightContent !== false;
-    document.getElementById('apiUrl').value = result.apiUrl || 'http://localhost:8000/api/v1';
+    document.getElementById('apiUrl').value = result.apiUrl || 'https://verify-ai-backend-1997316706.asia-south1.run.app/api/v1';
     document.getElementById('confidenceThreshold').value = result.confidenceThreshold || 70;
     document.getElementById('maxItems').value = result.maxItems || 20;
 
@@ -73,7 +73,7 @@ function resetSettings() {
       autoScan: false,
       notificationsEnabled: true,
       highlightContent: true,
-      apiUrl: 'http://localhost:8000/api/v1',
+      apiUrl: 'https://verify-ai-backend-1997316706.asia-south1.run.app/api/v1',
       confidenceThreshold: 70,
       maxItems: 20
     };

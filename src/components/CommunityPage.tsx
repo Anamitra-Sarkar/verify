@@ -9,6 +9,7 @@ import { Button } from './ui/button';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
+import { API_CONFIG } from '../config/api';
 
 interface CommunityPageProps {
   language: string;
@@ -61,7 +62,7 @@ interface Discussion {
 }
 
 // API functions
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = `${API_CONFIG.BASE_URL}/api/v1`;
 
 async function fetchLeaderboard(token?: string): Promise<LeaderboardEntry[]> {
   const headers: HeadersInit = {

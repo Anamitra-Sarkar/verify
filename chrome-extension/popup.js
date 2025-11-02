@@ -1,5 +1,5 @@
 // Configuration
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = 'https://verify-ai-backend-1997316706.asia-south1.run.app/api/v1';
 
 // Get current tab
 async function getCurrentTab() {
@@ -342,7 +342,7 @@ async function scanPage() {
       resultsContainer.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">⚠️</div>
-          <div class="empty-state-text">Failed to scan. Make sure the backend is running at localhost:8000</div>
+          <div class="empty-state-text">Failed to scan. Please check your connection and try again.</div>
         </div>
       `;
     }

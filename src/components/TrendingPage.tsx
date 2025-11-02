@@ -58,17 +58,86 @@ export function TrendingPage({ language }: TrendingPageProps) {
   const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<string | null>(null);
+  const [locationPermission, setLocationPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt');
 
   useEffect(() => {
+    // Check if location permission was previously granted
+    const savedLocation = localStorage.getItem('userLocation');
+    if (savedLocation) {
+      setUserLocation(savedLocation);
+      setLocationPermission('granted');
+    }
     fetchTrendingTopics();
   }, []);
 
-  const fetchTrendingTopics = async () => {
+  const requestLocationAccess = async () => {
+    try {
+      if ('geolocation' in navigator) {
+        // Try to query permissions if supported
+        try {
+          const permission = await navigator.permissions.query({ name: 'geolocation' });
+          
+          if (permission.state === 'granted' || permission.state === 'prompt') {
+            navigator.geolocation.getCurrentPosition(
+              async (position) => {
+                // Use reverse geocoding to get location name
+                // For now, we'll use a simple approximation
+                const location = 'India'; // TODO: Implement reverse geocoding
+                setUserLocation(location);
+                localStorage.setItem('userLocation', location);
+                setLocationPermission('granted');
+                fetchTrendingTopics(location);
+                toast.success('Location access granted - showing local trending topics');
+              },
+              (error) => {
+                console.error('Location error:', error);
+                setLocationPermission('denied');
+                toast.info('Location access denied - showing global trending topics');
+                fetchTrendingTopics();
+              }
+            );
+          } else {
+            setLocationPermission('denied');
+            fetchTrendingTopics();
+          }
+        } catch (permError) {
+          // Fallback for browsers that don't support permissions API
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const location = 'India';
+              setUserLocation(location);
+              localStorage.setItem('userLocation', location);
+              setLocationPermission('granted');
+              fetchTrendingTopics(location);
+              toast.success('Location access granted - showing local trending topics');
+            },
+            (error) => {
+              console.error('Location error:', error);
+              setLocationPermission('denied');
+              toast.info('Location access denied - showing global trending topics');
+              fetchTrendingTopics();
+            }
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Location access error:', error);
+      setLocationPermission('denied');
+      fetchTrendingTopics();
+    }
+  };
+
+  const fetchTrendingTopics = async (location?: string) => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${API_BASE_URL}/api/v1/trending?limit=10`);
+      const url = location 
+        ? `${API_BASE_URL}/api/v1/trending?limit=10&location=${encodeURIComponent(location)}`
+        : `${API_BASE_URL}/api/v1/trending?limit=10`;
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
         if (response.status === 503) {
@@ -124,13 +193,32 @@ export function TrendingPage({ language }: TrendingPageProps) {
           animate={{ opacity: 1, y: 0 }}
           className="mb-12"
         >
-          <div className="flex items-center gap-3 mb-4">
-            <TrendingUp className="w-8 h-8 text-blue-600" />
-            <h2>Trending Misinformation</h2>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <TrendingUp className="w-8 h-8 text-blue-600" />
+              <h2>Trending Misinformation</h2>
+            </div>
+            {locationPermission === 'prompt' && (
+              <button
+                onClick={requestLocationAccess}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <MapPin className="w-4 h-4" />
+                Enable Location
+              </button>
+            )}
           </div>
           <p className="text-xl text-gray-600 dark:text-gray-400">
             Real-time tracking of viral misinformation across regions
+            {userLocation && <span className="ml-2 text-blue-600">• Showing trends for {userLocation}</span>}
           </p>
+          {locationPermission === 'denied' && (
+            <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                Location access denied. Showing global trending topics instead.
+              </p>
+            </div>
+          )}
         </motion.div>
 
         <div className="grid lg:grid-cols-3 gap-8 mb-12">

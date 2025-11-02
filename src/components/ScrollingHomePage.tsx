@@ -21,6 +21,7 @@ export function ScrollingHomePage({ onAnalyzeClick, language }: ScrollingHomePag
   const [currentLanguageIndex, setCurrentLanguageIndex] = useState(0);
   const [robotPhase, setRobotPhase] = useState<'flying' | 'shrinking' | 'static'>('flying');
   const [showWhatsAppMessage, setShowWhatsAppMessage] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
 
   // Translation function
   const translate = (key: string) => t(key, language);
@@ -633,6 +634,7 @@ export function ScrollingHomePage({ onAnalyzeClick, language }: ScrollingHomePag
             </Button>
             <Button
               variant="outline"
+              onClick={() => setShowDemo(true)}
               className="px-8 py-6 text-lg font-semibold bg-white/10 hover:bg-white/20 backdrop-blur-xl border-white/20 text-white rounded-full transition-all duration-300 hover:scale-105"
             >
               Watch Demo
@@ -1505,6 +1507,65 @@ export function ScrollingHomePage({ onAnalyzeClick, language }: ScrollingHomePag
           </div>
         </div>
       </section>
+
+      {/* Demo Modal */}
+      {showDemo && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm" 
+          onClick={() => setShowDemo(false)}
+        >
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="relative w-full max-w-4xl mx-4" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setShowDemo(false)}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 text-2xl"
+            >
+              ✕ Close
+            </button>
+            <div className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-2xl">
+              <div className="aspect-video bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center">
+                <div className="text-center text-white p-8">
+                  <Shield className="w-16 h-16 mx-auto mb-4" />
+                  <h3 className="text-3xl font-bold mb-4">VeriFy AI Demo</h3>
+                  <p className="text-lg mb-8 opacity-90">See how our AI-powered verification works in action</p>
+                  <ul className="text-left max-w-md mx-auto space-y-4 text-lg">
+                    <li className="flex items-center gap-3">
+                      <CheckCircle2 className="w-6 h-6 text-green-400" />
+                      <span>Upload any text, image, video, or URL</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <CheckCircle2 className="w-6 h-6 text-green-400" />
+                      <span>Get instant AI-powered analysis</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <CheckCircle2 className="w-6 h-6 text-green-400" />
+                      <span>View confidence scores and explanations</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <CheckCircle2 className="w-6 h-6 text-green-400" />
+                      <span>Access verification history and insights</span>
+                    </li>
+                  </ul>
+                  <button
+                    onClick={() => {
+                      setShowDemo(false);
+                      onAnalyzeClick();
+                    }}
+                    className="mt-8 px-8 py-3 bg-white text-blue-900 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+                  >
+                    Try It Now
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

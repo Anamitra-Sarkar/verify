@@ -13,8 +13,17 @@ import { Footer } from './components/Footer';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
 import { useAuth } from './context/AuthContext';
+import { 
+  PrivacyPolicyPage, 
+  TermsOfServicePage, 
+  CookiePolicyPage, 
+  ContactUsPage,
+  FeaturesPage,
+  HelpCenterPage
+} from './components/pages';
 
-type Page = 'Home' | 'Analyze' | 'Trending' | 'Community' | 'About' | 'Profile' | 'Settings';
+type Page = 'Home' | 'Analyze' | 'Trending' | 'Community' | 'About' | 'Profile' | 'Settings' | 
+  'Privacy' | 'Terms' | 'Cookies' | 'Contact' | 'Features' | 'Help';
 
 export default function App() {
   const { user, logout } = useAuth();
@@ -259,7 +268,7 @@ export default function App() {
             exit="exit"
             transition={pageTransition}
           >
-            <AboutPage language={language} />
+            <AboutPage language={language} onNavigate={(page: string) => handleNavigate(page as Page)} />
           </motion.div>
         )}
 
@@ -290,6 +299,84 @@ export default function App() {
           </motion.div>
         )}
 
+        {currentPage === 'Privacy' && (
+          <motion.div
+            key="privacy"
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={pageTransition}
+          >
+            <PrivacyPolicyPage />
+          </motion.div>
+        )}
+
+        {currentPage === 'Terms' && (
+          <motion.div
+            key="terms"
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={pageTransition}
+          >
+            <TermsOfServicePage />
+          </motion.div>
+        )}
+
+        {currentPage === 'Cookies' && (
+          <motion.div
+            key="cookies"
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={pageTransition}
+          >
+            <CookiePolicyPage />
+          </motion.div>
+        )}
+
+        {currentPage === 'Contact' && (
+          <motion.div
+            key="contact"
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={pageTransition}
+          >
+            <ContactUsPage />
+          </motion.div>
+        )}
+
+        {currentPage === 'Features' && (
+          <motion.div
+            key="features"
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={pageTransition}
+          >
+            <FeaturesPage />
+          </motion.div>
+        )}
+
+        {currentPage === 'Help' && (
+          <motion.div
+            key="help"
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={pageTransition}
+          >
+            <HelpCenterPage />
+          </motion.div>
+        )}
+
       </AnimatePresence>
       </div>
 
@@ -299,7 +386,7 @@ export default function App() {
       />
 
       {/* Footer */}
-      <Footer language={language} />
+      <Footer language={language} onNavigate={(page: string) => handleNavigate(page as Page)} />
 
       <Toaster />
     </div>

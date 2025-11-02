@@ -1,12 +1,13 @@
 import { motion } from 'motion/react';
-import { Shield, Github, Twitter, Linkedin, Mail, ExternalLink } from 'lucide-react';
+import { Shield, Github, Linkedin, Mail, ExternalLink } from 'lucide-react';
 import { t } from '../utils/translations';
 
 interface FooterProps {
   language?: string;
+  onNavigate?: (page: string) => void;
 }
 
-export function Footer({ language = 'en' }: FooterProps) {
+export function Footer({ language = 'en', onNavigate }: FooterProps) {
   const currentYear = new Date().getFullYear();
   const translate = (key: string) => t(key, language);
 
@@ -14,37 +15,36 @@ export function Footer({ language = 'en' }: FooterProps) {
     {
       title: translate('Product'),
       links: [
-        { name: translate('Features'), href: '#features' },
-        { name: translate('How it Works'), href: '#how-it-works' },
-        { name: translate('Accuracy'), href: '#accuracy' },
-        { name: translate('API Access'), href: '#api' },
+        { name: translate('Features'), page: 'Features' },
+        { name: translate('How it Works'), page: 'About' },
+        { name: translate('Accuracy'), page: 'About' },
+        { name: translate('API Access'), page: 'About' },
       ],
     },
     {
       title: translate('Resources'),
       links: [
-        { name: translate('Blog'), href: '#blog' },
-        { name: translate('Guidelines'), href: '#guidelines' },
-        { name: translate('Help Center'), href: '#help' },
-        { name: translate('Community'), href: '#community' },
+        { name: translate('Blog'), page: 'Community' },
+        { name: translate('Guidelines'), page: 'Community' },
+        { name: translate('Help Center'), page: 'Help' },
+        { name: translate('Community'), page: 'Community' },
       ],
     },
     {
       title: translate('Legal'),
       links: [
-        { name: translate('Privacy Policy'), href: '#privacy' },
-        { name: translate('Terms of Service'), href: '#terms' },
-        { name: translate('Cookie Policy'), href: '#cookies' },
-        { name: translate('Contact Us'), href: '#contact' },
+        { name: translate('Privacy Policy'), page: 'Privacy' },
+        { name: translate('Terms of Service'), page: 'Terms' },
+        { name: translate('Cookie Policy'), page: 'Cookies' },
+        { name: translate('Contact Us'), page: 'Contact' },
       ],
     },
   ];
 
   const socialLinks = [
-    { icon: Twitter, href: '#', label: 'Twitter' },
-    { icon: Github, href: '#', label: 'GitHub' },
-    { icon: Linkedin, href: '#', label: 'LinkedIn' },
-    { icon: Mail, href: '#', label: 'Email' },
+    { icon: Github, href: 'https://github.com/Anamitra-Sarkar', label: 'GitHub' },
+    { icon: Linkedin, href: 'https://www.linkedin.com/in/anamitra-sarkar-7538b936b/', label: 'LinkedIn' },
+    { icon: Mail, href: 'mailto:anamitrasarkar13@gmail.com', label: 'Email' },
   ];
 
   return (
@@ -122,13 +122,13 @@ export function Footer({ language = 'en' }: FooterProps) {
                 <ul className="space-y-3">
                   {section.links.map((link) => (
                     <li key={link.name}>
-                      <a
-                        href={link.href}
-                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1 group"
+                      <button
+                        onClick={() => onNavigate && onNavigate(link.page)}
+                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1 group cursor-pointer"
                       >
                         {link.name}
                         <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </a>
+                      </button>
                     </li>
                   ))}
                 </ul>

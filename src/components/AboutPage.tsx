@@ -5,9 +5,10 @@ import { t } from '../utils/translations';
 
 interface AboutPageProps {
   language?: string;
+  onNavigate?: (page: string) => void;
 }
 
-export function AboutPage({ language = 'en' }: AboutPageProps) {
+export function AboutPage({ language = 'en', onNavigate }: AboutPageProps) {
   const translate = (key: string) => t(key, language);
   const features = [
     {
@@ -190,10 +191,16 @@ export function AboutPage({ language = 'en' }: AboutPageProps) {
             and become part of our community of truth guardians.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
-            <button className="px-8 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-colors">
+            <button 
+              onClick={() => onNavigate && onNavigate('Analyze')}
+              className="px-8 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-colors"
+            >
               Get Started
             </button>
-            <button className="px-8 py-3 rounded-xl glass-card hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <button 
+              onClick={() => onNavigate && onNavigate('Features')}
+              className="px-8 py-3 rounded-xl glass-card hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
               Learn More
             </button>
           </div>

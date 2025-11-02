@@ -42,8 +42,19 @@ except ImportError:
     TAVILY_AVAILABLE = False
 
 @router.get("/trending", response_model=List[TrendingTopic])
-async def get_trending_topics(limit: int = 10):
-    """Get real-time trending fake news topics using Tavily API."""
+async def get_trending_topics(
+    limit: int = 10,
+    location: str = None,
+    country: str = "India"
+):
+    """
+    Get real-time trending fake news topics using Tavily API.
+    
+    Args:
+        limit: Number of topics to return
+        location: Optional location filter (city/state)
+        country: Country filter (default: India)
+    """
     
     if not TAVILY_AVAILABLE or not tavily:
         # Fallback if Tavily is not available
@@ -53,14 +64,25 @@ async def get_trending_topics(limit: int = 10):
         )
     
     try:
-        # Search for trending fake news and misinformation topics
-        trending_queries = [
-            "fake news trending today",
-            "viral misinformation 2025",
-            "fact check trending claims",
-            "debunked stories today",
-            "social media hoaxes trending"
-        ]
+        # Customize queries based on location
+        if location:
+            location_query = f"{location} {country} fake news"
+            trending_queries = [
+                f"fake news trending in {location} {country}",
+                f"viral misinformation {location} today",
+                f"debunked stories {location}",
+                "fake news trending today",
+                "viral misinformation 2025",
+            ]
+        else:
+            trending_queries = [
+                f"fake news trending in {country}",
+                "fake news trending today",
+                "viral misinformation 2025",
+                "fact check trending claims",
+                "debunked stories today",
+                "social media hoaxes trending"
+            ]
         
         trending_topics = []
         topic_id = 1

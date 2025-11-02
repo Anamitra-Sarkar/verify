@@ -17,7 +17,7 @@ chrome.runtime.onInstalled.addListener((details) => {
       autoScan: true, // 🤖 Enable auto-scan by default
       notificationsEnabled: true,
       showAlerts: true,
-      apiUrl: 'http://localhost:8000/api/v1'
+      apiUrl: 'https://verify-ai-backend-1997316706.asia-south1.run.app/api/v1'
     });
 
     // Open welcome page
@@ -72,7 +72,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 // Get API URL from storage
 async function getApiUrl() {
   const result = await chrome.storage.sync.get(['apiUrl']);
-  return result.apiUrl || 'http://localhost:8000/api/v1';
+  return result.apiUrl || 'https://verify-ai-backend-1997316706.asia-south1.run.app/api/v1';
 }
 
 // Analyze text

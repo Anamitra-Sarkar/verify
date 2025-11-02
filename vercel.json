@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": null,
+  "env": {
+    "VITE_API_URL": "https://verify-ai-backend-1997316706.asia-south1.run.app"
+  }
+}

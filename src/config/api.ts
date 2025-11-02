@@ -1,15 +1,20 @@
 /**
  * API Configuration for VeriFy AI
  * Backend integration settings
- *
- * --- HARDCODED FIX ---
- * We are temporarily removing the VITE_API_URL variable
- * to force the correct production URL and debug the deployment.
  */
 
-// API Base URL - Hardcoded to your Cloud Run service
+// API Base URL - Use environment variable with fallback to production
+const getBaseUrl = () => {
+  // In production (Vercel), use the environment variable
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // Fallback to production Cloud Run URL
+  return 'https://verify-ai-backend-1997316706.asia-south1.run.app';
+};
+
 export const API_CONFIG = {
-  BASE_URL: 'https://verify-ai-backend-1997316706.asia-south1.run.app',
+  BASE_URL: getBaseUrl(),
   VERSION: 'v1',
   TIMEOUT: 30000, // 30 seconds
 };

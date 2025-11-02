@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Shield, Github, Twitter, Linkedin, Mail, ExternalLink } from 'lucide-react';
+import { Shield, Github, Linkedin, Mail, ExternalLink } from 'lucide-react';
 import { t } from '../utils/translations';
 
 interface FooterProps {
@@ -41,10 +41,9 @@ export function Footer({ language = 'en' }: FooterProps) {
   ];
 
   const socialLinks = [
-    { icon: Twitter, href: '#', label: 'Twitter' },
-    { icon: Github, href: '#', label: 'GitHub' },
-    { icon: Linkedin, href: '#', label: 'LinkedIn' },
-    { icon: Mail, href: '#', label: 'Email' },
+    { icon: Github, href: 'https://github.com/Anamitra-Sarkar', label: 'GitHub' },
+    { icon: Linkedin, href: 'https://www.linkedin.com/in/anamitra-sarkar-7538b936b/', label: 'LinkedIn' },
+    { icon: Mail, href: 'mailto:anamitrasarkar13@gmail.com', label: 'Email' },
   ];
 
   return (

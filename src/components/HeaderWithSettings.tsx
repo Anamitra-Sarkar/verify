@@ -26,8 +26,23 @@ interface HeaderProps {
 }
 
 const languages = [
+  { code: 'en', name: 'English', flag: '🇮🇳' },
   { code: 'hi', name: 'हिंदी', flag: '🇮🇳' },
-  { code: 'bn', name: 'বাংলা', flag: '🇧🇩' },
+  { code: 'bn', name: 'বাংলা', flag: '🇮🇳' },
+  { code: 'te', name: 'తెలుగు', flag: '🇮🇳' },
+  { code: 'mr', name: 'मराठी', flag: '🇮🇳' },
+  { code: 'ta', name: 'தமிழ்', flag: '🇮🇳' },
+  { code: 'gu', name: 'ગુજરાતી', flag: '🇮🇳' },
+  { code: 'kn', name: 'ಕನ್ನಡ', flag: '🇮🇳' },
+  { code: 'ml', name: 'മലയാളം', flag: '🇮🇳' },
+  { code: 'pa', name: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
+  { code: 'or', name: 'ଓଡ଼ିଆ', flag: '🇮🇳' },
+  { code: 'as', name: 'অসমীয়া', flag: '🇮🇳' },
+  { code: 'ur', name: 'اردو', flag: '🇮🇳' },
+  { code: 'sa', name: 'संस्कृत', flag: '🇮🇳' },
+  { code: 'ks', name: 'कॉशुर', flag: '🇮🇳' },
+  { code: 'ne', name: 'नेपाली', flag: '🇮🇳' },
+  { code: 'sd', name: 'سنڌي', flag: '🇮🇳' },
 ];
 
 // Generate gradient avatar based on user ID

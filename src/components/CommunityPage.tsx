@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import { API_CONFIG } from '../config/api';
+import { firebaseAuthService } from '../services/firebaseAuth';
 
 interface CommunityPageProps {
   language: string;
@@ -252,8 +253,8 @@ export function CommunityPage({ language }: CommunityPageProps) {
     setLoading(true);
     
     try {
-      // Get token from Firebase user
-      const token = user ? await (user as any).getIdToken() : undefined;
+      // Get token from Firebase auth service
+      const token = user ? await firebaseAuthService.getIdToken() : undefined;
       
       // Fetch all data in parallel
       const [leaderboard, stats, badges, disc] = await Promise.all([

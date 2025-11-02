@@ -268,7 +268,7 @@ export default function App() {
             exit="exit"
             transition={pageTransition}
           >
-            <AboutPage language={language} />
+            <AboutPage language={language} onNavigate={(page: string) => handleNavigate(page as Page)} />
           </motion.div>
         )}
 

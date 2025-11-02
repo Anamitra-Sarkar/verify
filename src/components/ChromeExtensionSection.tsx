@@ -3,6 +3,7 @@ import { Chrome, Download, CheckCircle, Zap, Shield, Eye } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
+import { useEffect, useRef, useState } from 'react';
 
 export function ChromeExtensionSection() {
   const features = [
@@ -29,6 +30,43 @@ export function ChromeExtensionSection() {
     'Pin the extension to toolbar',
     'Start verifying content instantly',
   ];
+
+  // Extension detection state
+  const [extensionStatus, setExtensionStatus] = useState<
+    'unknown' | 'checking' | 'installed' | 'not_installed'
+  >('unknown');
+  const checkTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      const data = e?.data;
+      if (!data || data?.type !== 'VERIFY_EXTENSION_PONG') return;
+      // Received pong from extension
+      setExtensionStatus('installed');
+      if (checkTimeoutRef.current) {
+        window.clearTimeout(checkTimeoutRef.current);
+        checkTimeoutRef.current = null;
+      }
+    }
+    window.addEventListener('message', onMessage);
+    return () => {
+      window.removeEventListener('message', onMessage);
+      if (checkTimeoutRef.current) {
+        window.clearTimeout(checkTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  function checkExtension() {
+    setExtensionStatus('checking');
+    // send ping — extension's content script must listen and reply with VERIFY_EXTENSION_PONG
+    window.postMessage({ type: 'VERIFY_EXTENSION_PING' }, '*');
+    // if no response in 1.5s, consider it not installed
+    checkTimeoutRef.current = window.setTimeout(() => {
+      setExtensionStatus('not_installed');
+      checkTimeoutRef.current = null;
+    }, 1500);
+  }
 
   return (
     <div className="py-24 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-blue-950/50 dark:to-purple-950/50">
@@ -180,6 +218,22 @@ export function ChromeExtensionSection() {
                 <Download className="w-5 h-5" />
                 Add to Chrome - It's Free
               </Button>
+              <div className="mt-3 space-y-2">
+                <div className="flex gap-2">
+                  <button
+                    onClick={checkExtension}
+                    className="w-full text-sm px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border"
+                  >
+                    Check if installed
+                  </button>
+                </div>
+                <p className="text-xs text-center text-gray-500">
+                  {extensionStatus === 'unknown' && 'Status: unknown'}
+                  {extensionStatus === 'checking' && 'Checking...'}
+                  {extensionStatus === 'installed' && 'Extension is installed'}
+                  {extensionStatus === 'not_installed' && 'Extension not detected'}
+                </p>
+              </div>
               <p className="text-xs text-gray-500 text-center mt-3">
                 Works with Chrome, Edge, Brave, and other Chromium browsers
               </p>

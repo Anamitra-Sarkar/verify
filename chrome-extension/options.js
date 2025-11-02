@@ -16,7 +16,7 @@ function loadSettings() {
     document.getElementById('apiUrl').value = result.apiUrl || 'http://localhost:8000/api/v1';
     document.getElementById('confidenceThreshold').value = result.confidenceThreshold || 70;
     document.getElementById('maxItems').value = result.maxItems || 20;
-    
+
     // Update confidence value display
     document.getElementById('confidenceValue').textContent = 
       (result.confidenceThreshold || 70) + '%';
@@ -51,7 +51,7 @@ function saveSettings() {
   // Save to storage
   chrome.storage.sync.set(settings, () => {
     showStatus('✅ Settings saved successfully!', 'success');
-    
+
     // Notify all tabs about settings change
     chrome.tabs.query({}, (tabs) => {
       tabs.forEach(tab => {
@@ -109,12 +109,15 @@ document.getElementById('resetButton').addEventListener('click', resetSettings);
 // Load settings on page load
 document.addEventListener('DOMContentLoaded', loadSettings);
 
-// Test API connection
+// Test API connection - FIXED VERSION
 async function testApiConnection() {
   const apiUrl = document.getElementById('apiUrl').value.trim();
-  
+
   try {
-    const response = await fetch(`${apiUrl.replace('/api/v1', '')}/api/v1/health`);
+    // FIX: Use apiUrl directly with /health endpoint
+    const healthUrl = `${apiUrl}/health`;
+    const response = await fetch(healthUrl);
+
     if (response.ok) {
       const data = await response.json();
       showStatus('✅ Backend connection successful!', 'success');

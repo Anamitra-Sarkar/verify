@@ -1,12 +1,21 @@
 import { useState, useRef, DragEvent } from 'react';
 import { motion } from 'motion/react';
-import { FileText, Image, Video, Mic, Upload, Loader2, CheckCircle, XCircle, AlertCircle, Link } from 'lucide-react';
+import {
+  FileText,
+  Image,
+  Video,
+  Mic,
+  Upload,
+  Loader2,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Link,
+} from 'lucide-react';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
 
-
 type ContentType = 'text' | 'image' | 'video' | 'voice' | 'url';
-
 
 interface AnalysisResult {
   status: 'real' | 'fake' | 'uncertain';
@@ -14,7 +23,6 @@ interface AnalysisResult {
   details: string;
   source?: string;
 }
-
 
 const contentTypes = [
   { id: 'text' as ContentType, label: 'Text', icon: FileText },
@@ -36,14 +44,24 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-
   // File type validation
   const acceptedFiles = {
-    image: { types: ['image/jpeg', 'image/png', 'image/webp'], maxSize: 10 * 1024 * 1024, extensions: 'JPG, PNG, WebP' },
-    video: { types: ['video/mp4', 'video/webm', 'video/quicktime'], maxSize: 50 * 1024 * 1024, extensions: 'MP4, WebM, MOV' },
-    voice: { types: ['audio/mpeg', 'audio/wav', 'audio/mp4', 'audio/ogg'], maxSize: 20 * 1024 * 1024, extensions: 'MP3, WAV, M4A, OGG' },
+    image: {
+      types: ['image/jpeg', 'image/png', 'image/webp'],
+      maxSize: 10 * 1024 * 1024,
+      extensions: 'JPG, PNG, WebP',
+    },
+    video: {
+      types: ['video/mp4', 'video/webm', 'video/quicktime'],
+      maxSize: 50 * 1024 * 1024,
+      extensions: 'MP4, WebM, MOV',
+    },
+    voice: {
+      types: ['audio/mpeg', 'audio/wav', 'audio/mp4', 'audio/ogg'],
+      maxSize: 20 * 1024 * 1024,
+      extensions: 'MP3, WAV, M4A, OGG',
+    },
   };
-
 
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -51,49 +69,39 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
     setIsDragging(true);
   };
 
-
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
   };
 
-
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-
   const validateFile = (file: File): boolean => {
     if (activeType === 'text' || activeType === 'url') return false;
 
-
     const config = acceptedFiles[activeType as 'image' | 'video' | 'voice'];
-    
-    // Check file type
+
     if (!config.types.includes(file.type)) {
       toast.error(`Invalid file type. Please upload ${config.extensions}`);
       return false;
     }
 
-
-    // Check file size
     if (file.size > config.maxSize) {
       toast.error(`File too large. Max size: ${config.maxSize / (1024 * 1024)}MB`);
       return false;
     }
 
-
     return true;
   };
-
 
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-
 
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
@@ -104,7 +112,6 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
       }
     }
   };
-
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -117,29 +124,41 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
     }
   };
 
-
   const handleAnalyze = async () => {
     if (activeType === 'text' && !textInput.trim()) {
       toast.error('Please enter some text to analyze');
       return;
     }
 
-
     if (activeType === 'url' && !urlInput.trim()) {
       toast.error('Please enter a URL to analyze');
       return;
     }
 
+    // Validate URL input
+    if (activeType === 'url') {
+      try {
+        const parsedUrl = new URL(urlInput);
+        if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+          throw new Error('Only http and https URLs are supported.');
+        }
+      } catch (error) {
+        let message = 'Please enter a valid URL (e.g., https://example.com)';
+        if (error instanceof Error && error.message.includes('supported')) {
+          message = error.message;
+        }
+        toast.error(message);
+        return;
+      }
+    }
 
     if (activeType !== 'text' && activeType !== 'url' && !selectedFile) {
       toast.error('Please select a file to analyze');
       return;
     }
 
-
     setIsAnalyzing(true);
     setResult(null);
-
 
     try {
       if (activeType === 'text') {
@@ -149,9 +168,7 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
           body: JSON.stringify({ text: textInput }),
         });
 
-        if (!response.ok) {
-          throw new Error(`API error: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`API error: ${response.statusText}`);
 
         const data = await response.json();
         setResult({
@@ -166,19 +183,12 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
           body: JSON.stringify({ url: urlInput }),
         });
 
-        if (!response.ok) {
-          throw new Error(`API error: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`API error: ${response.statusText}`);
 
         const data = await response.json();
-        console.log('URL Response:', data);
-        console.log('Confidence value:', data.confidence, 'Type:', typeof data.confidence);
-        
         const confidenceValue = Number(data.confidence);
         const finalConfidence = isNaN(confidenceValue) ? 0 : confidenceValue;
-        
-        console.log('Final confidence:', finalConfidence);
-        
+
         setResult({
           status: data.is_fake ? 'fake' : 'real',
           confidence: finalConfidence,
@@ -188,7 +198,7 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
       } else if (selectedFile) {
         const formData = new FormData();
         formData.append('file', selectedFile);
-        
+
         const endpoints: Record<ContentType, string> = {
           text: '/v1/check-text',
           image: '/v1/check-image',
@@ -202,10 +212,8 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
           body: formData,
         });
 
-        if (!response.ok) {
-          throw new Error(`API error: ${response.statusText}`);
-        }
-        
+        if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+
         const data = await response.json();
         setResult({
           status: data.is_fake ? 'fake' : 'real',
@@ -228,7 +236,6 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
     }
   };
 
-
   const handleTypeChange = (type: ContentType) => {
     setActiveType(type);
     setSelectedFile(null);
@@ -237,7 +244,6 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
     setResult(null);
     setIsDragging(false);
   };
-
 
   const getResultIcon = () => {
     if (!result) return null;
@@ -251,7 +257,6 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
     }
   };
 
-
   const getResultColor = () => {
     if (!result) return '';
     switch (result.status) {
@@ -263,7 +268,6 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
         return 'text-yellow-600 dark:text-yellow-400';
     }
   };
-
 
   return (
     <div className="min-h-screen pt-28 pb-16">
@@ -282,7 +286,6 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
               Select content type and upload your file for AI-powered verification
             </p>
           </div>
-
 
           {/* Content Type Tabs */}
           <div className="glass-card rounded-2xl p-6 mb-8">
@@ -306,14 +309,11 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
             </div>
           </div>
 
-
           {/* Upload Area */}
           <div className="glass-card rounded-2xl p-8 mb-8">
             {activeType === 'text' ? (
               <div>
-                <label className="block mb-3 text-sm font-medium">
-                  Enter text to analyze
-                </label>
+                <label className="block mb-3 text-sm font-medium">Enter text to analyze</label>
                 <textarea
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
@@ -323,9 +323,7 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
               </div>
             ) : activeType === 'url' ? (
               <div>
-                <label className="block mb-3 text-sm font-medium">
-                  Enter URL to verify
-                </label>
+                <label className="block mb-3 text-sm font-medium">Enter URL to verify</label>
                 <input
                   type="url"
                   value={urlInput}
@@ -346,7 +344,6 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-                
                 <div
                   onDragEnter={handleDragEnter}
                   onDragOver={handleDragOver}
@@ -359,8 +356,12 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
                       : 'border-gray-300 dark:border-gray-700 hover:border-blue-400'
                   }`}
                 >
-                  <Upload className={`w-16 h-16 mx-auto mb-4 ${isDragging ? 'text-blue-500' : 'text-gray-400'}`} />
-                  
+                  <Upload
+                    className={`w-16 h-16 mx-auto mb-4 ${
+                      isDragging ? 'text-blue-500' : 'text-gray-400'
+                    }`}
+                  />
+
                   {selectedFile ? (
                     <div>
                       <p className="text-lg font-medium text-green-600 dark:text-green-400 mb-2">
@@ -369,18 +370,19 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
                       <p className="text-sm text-gray-500">
                         {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
                       </p>
-                      <p className="text-xs text-gray-400 mt-2">
-                        Click to change file
-                      </p>
+                      <p className="text-xs text-gray-400 mt-2">Click to change file</p>
                     </div>
                   ) : (
                     <div>
                       <p className="text-lg font-medium mb-2">
-                        {isDragging ? `Drop your ${activeType} here` : `Drag & drop a${activeType === 'image' ? 'n' : ''} ${activeType}`}
+                        {isDragging
+                          ? `Drop your ${activeType} here`
+                          : `Drag & drop a${activeType === 'image' ? 'n' : ''} ${activeType}`}
                       </p>
                       <p className="text-gray-500 mb-1">or click to browse</p>
                       <p className="text-sm text-gray-400">
-                        Supports {acceptedFiles[activeType as 'image' | 'video' | 'voice'].extensions} • Max {acceptedFiles[activeType as 'image' | 'video' | 'voice'].maxSize / (1024 * 1024)}MB
+                        Supports {acceptedFiles[activeType as 'image' | 'video' | 'voice'].extensions} • Max{' '}
+                        {acceptedFiles[activeType as 'image' | 'video' | 'voice'].maxSize / (1024 * 1024)}MB
                       </p>
                     </div>
                   )}
@@ -389,15 +391,18 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
             )}
           </div>
 
-
           {/* Analyze Button */}
           <Button
             onClick={handleAnalyze}
             disabled={
-              isAnalyzing || 
-              (activeType === 'text' ? !textInput.trim() : 
-               activeType === 'url' ? !urlInput.trim() : 
-               !selectedFile)
+              isAnalyzing ||
+              Boolean(
+                activeType === 'text'
+                  ? !textInput.trim()
+                  : activeType === 'url'
+                  ? !urlInput.trim()
+                  : !selectedFile
+              )
             }
             className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -410,7 +415,6 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
               'Analyze Content'
             )}
           </Button>
-
 
           {/* Results */}
           {result && (
@@ -427,15 +431,15 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
                 >
                   {getResultIcon()}
                 </motion.div>
-                
+
                 <h3 className={`text-3xl font-bold mt-4 mb-2 ${getResultColor()}`}>
                   {result.status.toUpperCase()}
                 </h3>
-                
+
                 <p className="text-xl mb-4">
                   Confidence: {result.confidence ? Math.round(result.confidence * 100) : 0}%
                 </p>
-                
+
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-6">
                   <motion.div
                     initial={{ width: 0 }}
@@ -450,10 +454,8 @@ export function AnalyzePageWithDragDrop({ language }: { language: string }) {
                     }`}
                   />
                 </div>
-                
-                <p className="text-gray-600 dark:text-gray-400">
-                  {result.details}
-                </p>
+
+                <p className="text-gray-600 dark:text-gray-400">{result.details}</p>
               </div>
             </motion.div>
           )}

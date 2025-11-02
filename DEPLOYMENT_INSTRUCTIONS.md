@@ -10,8 +10,11 @@
 ### Automatic Deployment
 1. Connect your GitHub repository to Vercel
 2. Vercel will automatically detect the configuration from `vercel.json`
-3. Set the environment variable in Vercel dashboard:
-   - `VITE_API_URL=https://verify-ai-backend-1997316706.asia-south1.run.app`
+3. **IMPORTANT:** Set the environment variable in Vercel dashboard:
+   - Navigate to Project Settings → Environment Variables
+   - Add: `VITE_API_URL=https://verify-ai-backend-1997316706.asia-south1.run.app`
+   - Set for: Production, Preview, and Development environments
+4. Vercel will build and deploy automatically on push to main branch
 
 ### Manual Deployment
 ```bash
@@ -19,6 +22,8 @@ npm install
 npm run build
 # Deploy the 'build' directory to Vercel
 ```
+
+**Note:** The environment variable MUST be set in Vercel dashboard for production. It is not included in `vercel.json` for security reasons.
 
 ## Backend Deployment (Google Cloud Run)
 

@@ -6,7 +6,7 @@
 // API Base URL - change this based on environment
 export const API_CONFIG = {
   // Local development
-  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  BASE_URL: import.meta.env.VITE_API_URL || 'https://verify-ai-backend-1997316706.asia-south1.run.app',
   
   // Production (uncomment when deployed)
   // BASE_URL: 'https://api.verify-ai.com',
@@ -68,3 +68,4 @@ export function getAuthHeaders(): HeadersInit {
     ...(token && { 'Authorization': `Bearer ${token}` }),
   };
 }
+

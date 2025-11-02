@@ -74,14 +74,38 @@ export function TrendingPage({ language }: TrendingPageProps) {
   const requestLocationAccess = async () => {
     try {
       if ('geolocation' in navigator) {
-        const permission = await navigator.permissions.query({ name: 'geolocation' });
-        
-        if (permission.state === 'granted' || permission.state === 'prompt') {
+        // Try to query permissions if supported
+        try {
+          const permission = await navigator.permissions.query({ name: 'geolocation' });
+          
+          if (permission.state === 'granted' || permission.state === 'prompt') {
+            navigator.geolocation.getCurrentPosition(
+              async (position) => {
+                // Use reverse geocoding to get location name
+                // For now, we'll use a simple approximation
+                const location = 'India'; // TODO: Implement reverse geocoding
+                setUserLocation(location);
+                localStorage.setItem('userLocation', location);
+                setLocationPermission('granted');
+                fetchTrendingTopics(location);
+                toast.success('Location access granted - showing local trending topics');
+              },
+              (error) => {
+                console.error('Location error:', error);
+                setLocationPermission('denied');
+                toast.info('Location access denied - showing global trending topics');
+                fetchTrendingTopics();
+              }
+            );
+          } else {
+            setLocationPermission('denied');
+            fetchTrendingTopics();
+          }
+        } catch (permError) {
+          // Fallback for browsers that don't support permissions API
           navigator.geolocation.getCurrentPosition(
             async (position) => {
-              // Use reverse geocoding to get location name
-              // For now, we'll use a simple approximation
-              const location = 'India'; // Default to India
+              const location = 'India';
               setUserLocation(location);
               localStorage.setItem('userLocation', location);
               setLocationPermission('granted');
@@ -95,9 +119,6 @@ export function TrendingPage({ language }: TrendingPageProps) {
               fetchTrendingTopics();
             }
           );
-        } else {
-          setLocationPermission('denied');
-          fetchTrendingTopics();
         }
       }
     } catch (error) {

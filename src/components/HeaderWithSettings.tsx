@@ -26,7 +26,7 @@ interface HeaderProps {
 }
 
 const languages = [
-  { code: 'en', name: 'English', flag: '🇮🇳' },
+  { code: 'en', name: 'English', flag: '🌐' },
   { code: 'hi', name: 'हिंदी', flag: '🇮🇳' },
   { code: 'bn', name: 'বাংলা', flag: '🇮🇳' },
   { code: 'te', name: 'తెలుగు', flag: '🇮🇳' },

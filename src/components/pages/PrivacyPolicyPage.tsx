@@ -79,7 +79,7 @@ export function PrivacyPolicyPage() {
           <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Your privacy is important to us. This policy explains how we collect, use, and protect your information.
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-500 mt-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
             Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </motion.div>

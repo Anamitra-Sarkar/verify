@@ -1,16 +1,15 @@
 /**
  * API Configuration for VeriFy AI
  * Backend integration settings
+ *
+ * --- HARDCODED FIX ---
+ * We are temporarily removing the VITE_API_URL variable
+ * to force the correct production URL and debug the deployment.
  */
 
-// API Base URL - change this based on environment
+// API Base URL - Hardcoded to your Cloud Run service
 export const API_CONFIG = {
-  // Local development
-  BASE_URL: import.meta.env.VITE_API_URL || 'https://verify-ai-backend-1997316706.asia-south1.run.app',
-  
-  // Production (uncomment when deployed)
-  // BASE_URL: 'https://api.verify-ai.com',
-  
+  BASE_URL: 'https://verify-ai-backend-1997316706.asia-south1.run.app',
   VERSION: 'v1',
   TIMEOUT: 30000, // 30 seconds
 };
@@ -55,6 +54,8 @@ export const API_ENDPOINTS = {
  * Get full API URL
  */
 export function getApiUrl(endpoint: string): string {
+  // This will now build:
+  // https://...run.app/api/v1/check-text
   return `${API_CONFIG.BASE_URL}/api/${API_CONFIG.VERSION}${endpoint}`;
 }
 
@@ -68,4 +69,3 @@ export function getAuthHeaders(): HeadersInit {
     ...(token && { 'Authorization': `Bearer ${token}` }),
   };
 }
-

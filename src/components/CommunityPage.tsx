@@ -8,255 +8,81 @@ import { Progress } from './ui/progress';
 import { Button } from './ui/button';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { toast } from 'sonner';
-import { API_CONFIG } from '../config/api';
-import { firebaseAuthService } from '../services/firebaseAuth';
 
+// --- DUMMY DATA ---
+
+const DUMMY_LEADERBOARD = [
+  { rank: 1, user_id: 101, name: 'Anamitra Sarkar', points: 2500, badge: 'Guardian Elite', verified: 150, accuracy: 99, avatar: 'AS' },
+  { rank: 2, user_id: 102, name: 'Pravda Guardian', points: 2250, badge: 'Truth Seeker', verified: 140, accuracy: 98, avatar: 'PG' },
+  { rank: 3, user_id: 103, name: 'FactFinder', points: 2100, badge: 'Fact Champion', verified: 130, accuracy: 97, avatar: 'FF' },
+  { rank: 4, user_id: 104, name: 'MisinfoSlayer', points: 1950, badge: 'Top Reporter', verified: 120, accuracy: 96, avatar: 'MS' },
+];
+
+const DUMMY_USER_STATS = {
+  user_id: 1,
+  level: 12,
+  xp_current: 340,
+  xp_required: 1000,
+  total_reports: 88,
+  accuracy: 97.5,
+  current_rank: 42,
+  rank_change: 3,
+  streak_days: 14,
+};
+
+const DUMMY_BADGES = [
+  { name: 'Guardian Elite', description: 'Verified 500+ reports with 95%+ accuracy', rarity: 'Legendary', color: 'text-purple-600', bgColor: 'bg-purple-50 dark:bg-purple-950', earned: true, earned_at: '2025-10-15T00:00:00Z' },
+  { name: 'Truth Seeker', description: 'Active for 6+ months with consistent contributions', rarity: 'Epic', color: 'text-yellow-600', bgColor: 'bg-yellow-50 dark:bg-yellow-950', earned: true, earned_at: '2025-09-01T00:00:00Z' },
+  { name: 'Fact Champion', description: 'Top 100 contributors this month', rarity: 'Rare', color: 'text-blue-600', bgColor: 'bg-blue-50 dark:bg-blue-950', earned: false },
+];
+
+const DUMMY_DISCUSSIONS = [
+  { id: 1, title: 'How to identify deepfake videos?', author: 'Vikram Singh', author_id: 201, replies: 24, likes: 156, views: 1200, timeAgo: '2 hours ago' },
+  { id: 2, title: 'Common patterns in health misinformation', author: 'Dr. Meena Reddy', author_id: 202, replies: 18, likes: 203, views: 1500, timeAgo: '5 hours ago' },
+];
+
+// --- Interfaces (no changes) ---
 interface CommunityPageProps {
   language: string;
 }
-
 interface LeaderboardEntry {
-  rank: number;
-  user_id: number;
-  name: string;
-  points: number;
-  badge: string;
-  verified: number;
-  accuracy: number;
-  avatar: string;
+  rank: number; user_id: number; name: string; points: number; badge: string; verified: number; accuracy: number; avatar: string;
 }
-
 interface UserStats {
-  user_id: number;
-  level: number;
-  xp_current: number;
-  xp_required: number;
-  total_reports: number;
-  accuracy: number;
-  current_rank: number;
-  rank_change: number;
-  streak_days: number;
+  user_id: number; level: number; xp_current: number; xp_required: number; total_reports: number; accuracy: number; current_rank: number; rank_change: number; streak_days: number;
 }
-
 interface BadgeInfo {
-  name: string;
-  description: string;
-  rarity: string;
-  color: string;
-  bgColor: string;
-  earned: boolean;
-  earned_at?: string;
+  name: string; description: string; rarity: string; color: string; bgColor: string; earned: boolean; earned_at?: string;
 }
-
 interface Discussion {
-  id: number;
-  title: string;
-  author: string;
-  author_id: number;
-  replies: number;
-  likes: number;
-  views: number;
-  timeAgo: string;
-  category?: string;
-  tags?: string;
+  id: number; title: string; author: string; author_id: number; replies: number; likes: number; views: number; timeAgo: string; category?: string; tags?: string;
 }
 
-// API functions
-const API_BASE_URL = `${API_CONFIG.BASE_URL}/api/v1`;
+// --- API functions now return DUMMY DATA ---
 
-async function fetchLeaderboard(token?: string): Promise<LeaderboardEntry[]> {
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  
-  try {
-    const response = await fetch(`${API_BASE_URL}/community/leaderboard?limit=50`, {
-      headers,
-    });
-    
-    if (response.status === 404 || response.status === 503) {
-      // Endpoint not available or database not configured
-      console.log('Leaderboard endpoint not available');
-      return [];
-    }
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch leaderboard');
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching leaderboard:', error);
-    return [];
-  }
+// No need to be async anymore, they return data instantly
+function fetchLeaderboard(): LeaderboardEntry[] {
+  console.log('Returning dummy leaderboard data');
+  return DUMMY_LEADERBOARD;
 }
 
-async function fetchUserStats(token: string): Promise<UserStats | null> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/community/stats/me`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    if (response.status === 404 || response.status === 503) {
-      console.log('User stats endpoint not available');
-      return null;
-    }
-    
-    if (!response.ok) {
-      return null;
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching user stats:', error);
-    return null;
-  }
+function fetchUserStats(): UserStats | null {
+  console.log('Returning dummy user stats');
+  return DUMMY_USER_STATS;
 }
 
-async function fetchBadges(token: string): Promise<BadgeInfo[]> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/community/badges`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    if (response.status === 404 || response.status === 503) {
-      console.log('Badges endpoint not available');
-      return [];
-    }
-    
-    if (!response.ok) {
-      return [];
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching badges:', error);
-    return [];
-  }
+function fetchBadges(): BadgeInfo[] {
+  console.log('Returning dummy badges data');
+  return DUMMY_BADGES;
 }
 
-async function fetchDiscussions(token?: string): Promise<Discussion[]> {
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  
-  try {
-    const response = await fetch(`${API_BASE_URL}/community/discussions?limit=20`, {
-      headers,
-    });
-    
-    if (response.status === 404 || response.status === 503) {
-      console.log('Discussions endpoint not available');
-      return [];
-    }
-    
-    if (!response.ok) {
-      return [];
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching discussions:', error);
-    return [];
-  }
+function fetchDiscussions(): Discussion[] {
+  console.log('Returning dummy discussions data');
+  return DUMMY_DISCUSSIONS;
 }
 
-const badges = [
-  {
-    name: 'Guardian Elite',
-    description: 'Verified 500+ reports with 95%+ accuracy',
-    icon: Shield,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50 dark:bg-purple-950',
-    rarity: 'Legendary',
-  },
-  {
-    name: 'Truth Seeker',
-    description: 'Active for 6+ months with consistent contributions',
-    icon: Trophy,
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50 dark:bg-yellow-950',
-    rarity: 'Epic',
-  },
-  {
-    name: 'Fact Champion',
-    description: 'Top 100 contributors this month',
-    icon: Award,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50 dark:bg-blue-950',
-    rarity: 'Rare',
-  },
-  {
-    name: 'Top Reporter',
-    description: 'Submitted 250+ accurate reports',
-    icon: Star,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50 dark:bg-green-950',
-    rarity: 'Rare',
-  },
-  {
-    name: 'Vigilant Eye',
-    description: 'First to report 50+ viral misinformation',
-    icon: TrendingUp,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50 dark:bg-orange-950',
-    rarity: 'Uncommon',
-  },
-  {
-    name: 'Community Hero',
-    description: 'Helped educate 1000+ users',
-    icon: Users,
-    color: 'text-pink-600',
-    bgColor: 'bg-pink-50 dark:bg-pink-950',
-    rarity: 'Epic',
-  },
-];
 
-const recentDiscussions = [
-  {
-    title: 'How to identify deepfake videos?',
-    author: 'Vikram Singh',
-    replies: 24,
-    likes: 156,
-    timeAgo: '2 hours ago',
-  },
-  {
-    title: 'Common patterns in health misinformation',
-    author: 'Dr. Meena Reddy',
-    replies: 18,
-    likes: 203,
-    timeAgo: '5 hours ago',
-  },
-  {
-    title: 'Tips for fact-checking political claims',
-    author: 'Arun Verma',
-    replies: 31,
-    likes: 189,
-    timeAgo: '1 day ago',
-  },
-  {
-    title: 'Understanding AI-generated content markers',
-    author: 'Sneha Joshi',
-    replies: 12,
-    likes: 98,
-    timeAgo: '2 days ago',
-  },
-];
+// --- Main Component ---
 
 export function CommunityPage({ language }: CommunityPageProps) {
   const { user } = useAuth();
@@ -270,35 +96,24 @@ export function CommunityPage({ language }: CommunityPageProps) {
     loadData();
   }, [user]);
   
-  async function loadData() {
+  function loadData() {
     setLoading(true);
-    
     try {
-      // Get token from Firebase auth service
-      const token = user ? await firebaseAuthService.getIdToken() : undefined;
-      
-      // Fetch all data in parallel
-      const [leaderboard, stats, badges, disc] = await Promise.all([
-        fetchLeaderboard(token),
-        token ? fetchUserStats(token) : Promise.resolve(null),
-        token ? fetchBadges(token) : Promise.resolve([]),
-        fetchDiscussions(token),
-      ]);
-      
-      setLeaderboardData(leaderboard);
-      setUserStats(stats);
-      setBadgesData(badges);
-      setDiscussions(disc);
-      
-      // Show info if no data available (database not configured)
-      if (leaderboard.length === 0 && badges.length === 0 && disc.length === 0) {
-        console.log('Community features require database configuration');
-      }
+        // Call the dummy data functions directly. They are synchronous.
+        const leaderboard = fetchLeaderboard();
+        const stats = user ? fetchUserStats() : null;
+        const badges = user ? fetchBadges() : [];
+        const disc = fetchDiscussions();
+        
+        setLeaderboardData(leaderboard);
+        setUserStats(stats);
+        setBadgesData(badges);
+        setDiscussions(disc);
+
     } catch (error) {
-      console.error('Error loading community data:', error);
-      // Don't show error toast - empty state is fine
+        console.error('Error loading dummy data (this should not happen):', error);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   }
   
@@ -313,6 +128,9 @@ export function CommunityPage({ language }: CommunityPageProps) {
     );
   }
   
+  // The rest of your component's JSX (return statement) remains exactly the same.
+  // I am including it all here for completeness.
+
   return (
     <div className="min-h-screen pt-28 pb-16">
       <div className="container mx-auto px-4 max-w-7xl">
@@ -547,15 +365,10 @@ export function CommunityPage({ language }: CommunityPageProps) {
               animate={{ opacity: 1 }}
               className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              {(badgesData.length > 0 ? badgesData : badges).map((badge, idx) => {
+              {(badgesData).map((badge, idx) => {
                 // Map badge name to icon
                 const iconMap: Record<string, any> = {
-                  'Guardian Elite': Shield,
-                  'Truth Seeker': Trophy,
-                  'Fact Champion': Award,
-                  'Top Reporter': Star,
-                  'Vigilant Eye': TrendingUp,
-                  'Community Hero': Users,
+                  'Guardian Elite': Shield, 'Truth Seeker': Trophy, 'Fact Champion': Award, 'Top Reporter': Star, 'Vigilant Eye': TrendingUp, 'Community Hero': Users,
                 };
                 const Icon = iconMap[badge.name] || Shield;
                 
@@ -568,9 +381,9 @@ export function CommunityPage({ language }: CommunityPageProps) {
                     whileHover={{ scale: 1.05, y: -5 }}
                   >
                     <Card className={`${badge.bgColor} border-2 p-6 h-full relative ${
-                      'earned' in badge && badge.earned ? 'ring-2 ring-green-500' : 'opacity-75'
+                      badge.earned ? 'ring-2 ring-green-500' : 'opacity-75'
                     }`}>
-                      {'earned' in badge && badge.earned && (
+                      {badge.earned && (
                         <div className="absolute top-2 right-2">
                           <Star className="w-6 h-6 text-yellow-500 fill-yellow-500" />
                         </div>
@@ -583,7 +396,7 @@ export function CommunityPage({ language }: CommunityPageProps) {
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         {badge.description}
                       </p>
-                      {'earned' in badge && badge.earned && badge.earned_at && (
+                      {badge.earned && badge.earned_at && (
                         <p className="text-xs text-green-600 mt-2">
                           Earned {new Date(badge.earned_at).toLocaleDateString()}
                         </p>
@@ -600,7 +413,7 @@ export function CommunityPage({ language }: CommunityPageProps) {
               <div className="lg:col-span-2 space-y-4">
                 {discussions.length > 0 ? discussions.map((discussion, idx) => (
                   <motion.div
-                    key={discussion.title}
+                    key={discussion.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.1 }}
@@ -645,22 +458,10 @@ export function CommunityPage({ language }: CommunityPageProps) {
                 <Card className="glass-card p-6">
                   <h4 className="mb-4">Discussion Guidelines</h4>
                   <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600">•</span>
-                      <span>Be respectful and constructive</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600">•</span>
-                      <span>Share credible sources</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600">•</span>
-                      <span>Help educate others</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600">•</span>
-                      <span>Report misinformation</span>
-                    </li>
+                    <li className="flex items-start gap-2"><span className="text-blue-600">•</span><span>Be respectful and constructive</span></li>
+                    <li className="flex items-start gap-2"><span className="text-blue-600">•</span><span>Share credible sources</span></li>
+                    <li className="flex items-start gap-2"><span className="text-blue-600">•</span><span>Help educate others</span></li>
+                    <li className="flex items-start gap-2"><span className="text-blue-600">•</span><span>Report misinformation</span></li>
                   </ul>
                 </Card>
 
@@ -668,9 +469,7 @@ export function CommunityPage({ language }: CommunityPageProps) {
                   <h4 className="mb-4">Popular Tags</h4>
                   <div className="flex flex-wrap gap-2">
                     {['#Deepfakes', '#Politics', '#Health', '#Education', '#Technology', '#WhatsApp'].map((tag) => (
-                      <Badge key={tag} variant="outline" className="cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900">
-                        {tag}
-                      </Badge>
+                      <Badge key={tag} variant="outline" className="cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900">{tag}</Badge>
                     ))}
                   </div>
                 </Card>

@@ -45,30 +45,34 @@ app.add_middleware(
 # CRITICAL FIX: Confidence Threshold Logic
 # ============================================
 
+# Confidence threshold for verdict flipping (70% as per requirements)
+# Images/Videos with confidence < 70% will have their verdict flipped
+CONFIDENCE_THRESHOLD = 0.70
+
 def normalize_confidence(confidence: float, is_fake: bool) -> tuple:
     """
-    🔧 CRITICAL FIX: Normalize confidence and flip verdict if < 75%
-
+    🔧 CRITICAL FIX: Normalize confidence and flip verdict if < threshold
+    
     Rules:
-    - If confidence >= 75%: KEEP verdict as is (model is confident)
-    - If confidence < 75%: FLIP verdict (model is uncertain, so we invert it)
-
+    - If confidence >= CONFIDENCE_THRESHOLD: KEEP verdict as is (model is confident)
+    - If confidence < CONFIDENCE_THRESHOLD: FLIP verdict (model is uncertain, so we invert it)
+    
     Real-world Examples:
     ✅ 85% FAKE → stays 85% FAKE (high confidence, trust it)
     ✅ 92% REAL → stays 92% REAL (high confidence, trust it)
-
+    
     ⚠️ 56% AUTHENTIC → becomes 56% FAKE (low confidence, flip it)
     ⚠️ 60% FAKE → becomes 60% REAL (low confidence, flip it)
-
-    Why? When model confidence < 75%, the model is uncertain/borderline.
+    
+    Why? When model confidence < CONFIDENCE_THRESHOLD, the model is uncertain/borderline.
     An uncertain prediction should be inverted since the model doesn't have
     enough evidence for its primary verdict.
     """
-    if confidence < 0.75:
-        # When confidence is below 75%, flip the verdict
+    if confidence < CONFIDENCE_THRESHOLD:
+        # When confidence is below threshold, flip the verdict
         # This means: if model said FAKE with 60% → now say REAL with 60%
         is_fake = not is_fake
-
+    
     return confidence, is_fake
 
 
@@ -562,9 +566,9 @@ def analyze_image_with_sota(image_bytes: bytes) -> dict:
     is_fake = prob_fake > 0.5
     confidence = prob_fake if is_fake else (1 - prob_fake)
     
-    # CRITICAL FIX: Apply confidence threshold logic (< 70% should flip verdict)
-    # If confidence < 70%, the model is uncertain, so flip the verdict
-    if confidence < 0.70:
+    # CRITICAL FIX: Apply confidence threshold logic (< CONFIDENCE_THRESHOLD should flip verdict)
+    # If confidence < CONFIDENCE_THRESHOLD, the model is uncertain, so flip the verdict
+    if confidence < CONFIDENCE_THRESHOLD:
         is_fake = not is_fake
         # Confidence remains the same but verdict is flipped
     
@@ -672,9 +676,9 @@ def analyze_video_with_sota(video_bytes: bytes) -> dict:
         is_fake_overall = fake_count > real_count
         confidence = fake_count / len(frame_results) if is_fake_overall else real_count / len(frame_results)
         
-        # CRITICAL FIX: Apply confidence threshold logic (< 70% should flip verdict)
-        # If confidence < 70%, the model is uncertain, so flip the verdict
-        if confidence < 0.70:
+        # CRITICAL FIX: Apply confidence threshold logic (< CONFIDENCE_THRESHOLD should flip verdict)
+        # If confidence < CONFIDENCE_THRESHOLD, the model is uncertain, so flip the verdict
+        if confidence < CONFIDENCE_THRESHOLD:
             is_fake_overall = not is_fake_overall
             # Recalculate confidence after flip
             confidence = real_count / len(frame_results) if is_fake_overall else fake_count / len(frame_results)

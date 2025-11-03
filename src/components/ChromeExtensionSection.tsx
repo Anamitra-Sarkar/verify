@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 export function ChromeExtensionSection() {
   const features = [

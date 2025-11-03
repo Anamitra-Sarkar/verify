@@ -165,11 +165,14 @@ export function TrendingPage({ language }: TrendingPageProps) {
       regionMap.set(region, (regionMap.get(region) || 0) + topic.total_checks);
     });
     
+    const regionValues = Array.from(regionMap.values());
+    const maxCount = regionValues.length > 0 ? Math.max(...regionValues) : 1;
+    
     const hotspots = Array.from(regionMap.entries())
       .map(([region, count]) => ({
         region,
         count,
-        intensity: Math.min((count / Math.max(...Array.from(regionMap.values()))) * 100, 100)
+        intensity: Math.min((count / maxCount) * 100, 100)
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 6);

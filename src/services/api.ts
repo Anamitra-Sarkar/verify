@@ -1,121 +1,107 @@
-/**
- * API Client for VeriFy AI Backend
- * Handles all HTTP requests to the backend API
- */
+import { getApiUrl } from '../lib/utils';
+import { ApiError } from '../types';
 
-import { getApiUrl, getAuthHeaders, API_CONFIG } from '../config/api';
+// --- Community Feature Dummy Data ---
 
-export interface ApiError {
-  error: string;
-  detail: string | any;
-  status: number;
-}
+const DUMMY_LEADERBOARD = [
+  { rank: 1, user: { name: 'Pravda Guardian', avatar: '' }, score: 1500 },
+  { rank: 2, user: { name: 'FactFinder', avatar: '' }, score: 1250 },
+  { rank: 3, user: { name: 'TruthSeeker', avatar: '' }, score: 1100 },
+];
+
+const DUMMY_BADGES = [
+  { id: '1', name: 'First Catch', description: 'Reported your first piece of misinformation.' },
+  { id: '2', name: 'Community Helper', description: 'Helped 10 others with verifications.' },
+  { id: '3', name: 'Sharp Eye', description: 'Detected 5 deepfakes with high accuracy.' },
+];
+
+const DUMMY_STATS = {
+  reports_submitted: 25,
+  verifications_assisted: 42,
+  accuracy_rating: 98.5,
+};
+
+const DUMMY_DISCUSSIONS = [
+  { id: '1', title: 'New viral video about elections - is it real?', author: 'FactFinder', replies: 5, last_activity: '3h ago' },
+  { id: '2', title: 'Discussion: Best practices for spotting fake text messages', author: 'Admin', replies: 12, last_activity: '1d ago' },
+];
+
 
 export class ApiClient {
-  private static async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  static async request<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = getApiUrl(endpoint);
+    const token = localStorage.getItem('access_token');
     
-    const config: RequestInit = {
-      ...options,
-      headers: {
-        ...getAuthHeaders(),
-        ...options.headers,
-      },
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+      ...options.headers,
     };
-
-    try {
-      const response = await fetch(url, config);
-      
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({
-          error: 'Request failed',
-          detail: response.statusText,
-        }));
-        
-        throw {
-          ...error,
-          status: response.status,
-        } as ApiError;
-      }
-
-      return await response.json();
-    } catch (error) {
-      if ((error as ApiError).status) {
-        throw error;
-      }
-      throw {
-        error: 'Network Error',
-        detail: 'Failed to connect to server',
-        status: 0,
-      } as ApiError;
+    
+    const response = await fetch(url, { ...options, headers });
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({
+        error: 'Request failed',
+        detail: response.statusText,
+      }));
+      throw { ...error, status: response.status } as ApiError;
     }
+    
+    return await response.json();
+  }
+  
+  // Auth
+  static async login(data: { email?: string; password?: string; provider?: string; code?: string }) {
+    return this.request('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
-  // Authentication
-  static async register(data: {
-    email: string;
-    username: string;
-    password: string;
-    full_name?: string;
-  }) {
+  static async register(data: { name: string; email: string; password?: string }) {
     return this.request('/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  static async login(email: string, password: string) {
-    return this.request<{
-      access_token: string;
-      refresh_token: string;
-      token_type: string;
-    }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
-  }
-
-  static async refreshToken(refreshToken: string) {
-    return this.request<{ access_token: string }>('/auth/refresh', {
-      method: 'POST',
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    });
-  }
-
-  static async getCurrentUser() {
-    return this.request('/auth/me', {
+  static async verifyEmail(token: string) {
+    return this.request(`/auth/verify-email?token=${token}`, {
       method: 'GET',
     });
   }
 
-  // Text Detection
-  static async checkText(text: string, language?: string) {
-    return this.request<{
-      detection_id: number;
-      verdict: 'real' | 'fake' | 'unverified';
-      confidence: number;
-      explanation: string | null;
-      model_used: string;
-      processing_time_ms: number;
-      original_language: string | null;
-      translated_to_english: boolean;
-    }>('/check-text', {
+  static async forgotPassword(email: string) {
+    return this.request('/auth/forgot-password', {
       method: 'POST',
-      body: JSON.stringify({ text, language }),
+      body: JSON.stringify({ email }),
     });
   }
 
+  static async resetPassword(data: { token: string; password_hash: string }) {
+    return this.request('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+  
+  // Text Detection
+  static async checkText(text: string) {
+    return this.request('/check-text', {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+    });
+  }
+  
   // Image Detection
   static async checkImage(file: File) {
     const formData = new FormData();
     formData.append('file', file);
-
+    
     const url = getApiUrl('/check-image');
     const token = localStorage.getItem('access_token');
-
+    
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -123,7 +109,7 @@ export class ApiClient {
       },
       body: formData,
     });
-
+    
     if (!response.ok) {
       const error = await response.json().catch(() => ({
         error: 'Request failed',
@@ -131,18 +117,18 @@ export class ApiClient {
       }));
       throw { ...error, status: response.status } as ApiError;
     }
-
+    
     return await response.json();
   }
-
+  
   // Video Detection
   static async checkVideo(file: File) {
     const formData = new FormData();
     formData.append('file', file);
-
+    
     const url = getApiUrl('/check-video');
     const token = localStorage.getItem('access_token');
-
+    
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -150,7 +136,7 @@ export class ApiClient {
       },
       body: formData,
     });
-
+    
     if (!response.ok) {
       const error = await response.json().catch(() => ({
         error: 'Request failed',
@@ -158,7 +144,7 @@ export class ApiClient {
       }));
       throw { ...error, status: response.status } as ApiError;
     }
-
+    
     return await response.json() as {
       job_id: string;
       status: string;
@@ -166,7 +152,7 @@ export class ApiClient {
       message: string;
     };
   }
-
+  
   // Get Video Result
   static async getVideoResult(jobId: string) {
     return this.request<{
@@ -181,15 +167,15 @@ export class ApiClient {
       method: 'GET',
     });
   }
-
+  
   // Voice Detection
   static async checkVoice(file: File) {
     const formData = new FormData();
     formData.append('file', file);
-
+    
     const url = getApiUrl('/check-voice');
     const token = localStorage.getItem('access_token');
-
+    
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -197,7 +183,7 @@ export class ApiClient {
       },
       body: formData,
     });
-
+    
     if (!response.ok) {
       const error = await response.json().catch(() => ({
         error: 'Request failed',
@@ -205,17 +191,17 @@ export class ApiClient {
       }));
       throw { ...error, status: response.status } as ApiError;
     }
-
+    
     return await response.json();
   }
-
+  
   // Get Explanation
   static async getExplanation(detectionId: number) {
     return this.request(`/explanation/${detectionId}`, {
       method: 'GET',
     });
   }
-
+  
   // Submit Report
   static async submitReport(data: {
     content_url?: string;
@@ -229,7 +215,7 @@ export class ApiClient {
       body: JSON.stringify(data),
     });
   }
-
+  
   // Get Trending
   static async getTrending(params?: {
     time_window?: number;
@@ -241,7 +227,7 @@ export class ApiClient {
       method: 'GET',
     });
   }
-
+  
   // Get Trending Map
   static async getTrendingMap() {
     return this.request('/trending/map', {
@@ -249,6 +235,27 @@ export class ApiClient {
     });
   }
 
+  // --- Community Endpoints (Now with Dummy Data) ---
+  static async getDiscussions() {
+    console.warn("Using dummy data for getDiscussions");
+    return Promise.resolve(DUMMY_DISCUSSIONS);
+  }
+
+  static async getLeaderboard() {
+    console.warn("Using dummy data for getLeaderboard");
+    return Promise.resolve(DUMMY_LEADERBOARD);
+  }
+
+  static async getBadges() {
+    console.warn("Using dummy data for getBadges");
+    return Promise.resolve(DUMMY_BADGES);
+  }
+
+  static async getMyStats() {
+    console.warn("Using dummy data for getMyStats");
+    return Promise.resolve(DUMMY_STATS);
+  }
+  
   // Health Check
   static async healthCheck() {
     return this.request('/health', {

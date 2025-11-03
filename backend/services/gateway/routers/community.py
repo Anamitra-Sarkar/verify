@@ -207,29 +207,34 @@ async def get_leaderboard(
     db: Session = Depends(get_db)
 ):
     """Get leaderboard of top contributors."""
-    # Get all contributions sorted by points
-    contribs = db.query(UserContribution, User).join(
-        User, UserContribution.user_id == User.id
-    ).order_by(desc(UserContribution.total_points)).limit(limit).all()
-    
-    leaderboard = []
-    for rank, (contrib, user) in enumerate(contribs, start=1):
-        # Update rank
-        contrib.current_rank = rank
+    try:
+        # Get all contributions sorted by points
+        contribs = db.query(UserContribution, User).join(
+            User, UserContribution.user_id == User.id
+        ).order_by(desc(UserContribution.total_points)).limit(limit).all()
         
-        leaderboard.append(LeaderboardEntry(
-            rank=rank,
-            user_id=user.id,
-            name=user.full_name or user.username,
-            points=contrib.total_points,
-            badge=contrib.badge_name or "Beginner",
-            verified=contrib.verified_reports,
-            accuracy=contrib.accuracy_percentage,
-            avatar=get_user_avatar_initials(user.username, user.full_name)
-        ))
-    
-    db.commit()
-    return leaderboard
+        leaderboard = []
+        for rank, (contrib, user) in enumerate(contribs, start=1):
+            # Update rank
+            contrib.current_rank = rank
+            
+            leaderboard.append(LeaderboardEntry(
+                rank=rank,
+                user_id=user.id,
+                name=user.full_name or user.username,
+                points=contrib.total_points,
+                badge=contrib.badge_name or "Beginner",
+                verified=contrib.verified_reports,
+                accuracy=contrib.accuracy_percentage,
+                avatar=get_user_avatar_initials(user.username, user.full_name)
+            ))
+        
+        db.commit()
+        return leaderboard
+    except Exception as e:
+        # Database not configured or error - return empty list
+        print(f"Leaderboard error: {e}")
+        return []
 
 
 @router.get("/stats/me", response_model=UserStats)

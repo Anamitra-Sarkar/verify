@@ -1,4 +1,4 @@
-import { getApiUrl } from '../lib/utils';
+import { getApiUrl } from '../config/api';
 import { ApiError } from '../types';
 
 // --- Dummy Data Definitions ---

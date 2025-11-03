@@ -15,6 +15,11 @@ interface TrendingItem {
   average_confidence: number;
 }
 
+// Define the structure of the API response
+interface TrendingApiResponse {
+  trending_topics: TrendingItem[];
+}
+
 export function TrendingPage() {
   // State for data, loading, and errors
   const [trendingData, setTrendingData] = useState<TrendingItem[]>([]);
@@ -27,12 +32,15 @@ export function TrendingPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await ApiClient.getTrending();
-        // Ensure data is an array before setting it
-        if (Array.isArray(data)) {
-          setTrendingData(data);
+        // The API returns an object like { trending_topics: [...] }
+        const response: TrendingApiResponse = await ApiClient.getTrending();
+        
+        // Check if the response has the expected property and it is an array
+        if (response && Array.isArray(response.trending_topics)) {
+          setTrendingData(response.trending_topics);
         } else {
-          // If the API returns something other than an array, treat it as empty
+          // If the structure is wrong or the array is missing, treat as empty
+          console.warn("Unexpected API response structure for trending data:", response);
           setTrendingData([]);
         }
       } catch (err) {

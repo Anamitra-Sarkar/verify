@@ -15,50 +15,55 @@ interface TrendingItem {
   average_confidence: number;
 }
 
-// Define the structure of the API response
-interface TrendingApiResponse {
-  trending_topics: TrendingItem[];
-}
-
 export function TrendingPage() {
-  // State for data, loading, and errors
   const [trendingData, setTrendingData] = useState<TrendingItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Function to fetch data from the API
     const fetchTrendingData = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        // The API returns an object like { trending_topics: [...] }
-        const response: TrendingApiResponse = await ApiClient.getTrending();
+        const response = await ApiClient.getTrending();
+
+        // --- Defensive Data Handling ---
+        // Log the raw response to see its structure in the browser console.
+        console.log("API response for getTrending:", response);
+
+        let data: TrendingItem[] = [];
         
-        // Check if the response has the expected property and it is an array
-        if (response && Array.isArray(response.trending_topics)) {
-          setTrendingData(response.trending_topics);
+        if (Array.isArray(response)) {
+          // Case 1: The response itself is the array.
+          data = response;
+        } else if (typeof response === 'object' && response !== null) {
+          // Case 2: The response is an object, find the array within it.
+          const possibleKeys = ['trending_topics', 'data', 'results', 'items'];
+          const key = possibleKeys.find(k => Array.isArray(response[k]));
+          if (key) {
+            data = response[key];
+          } else {
+             console.warn("API response is an object, but no array found under expected keys.", response);
+          }
         } else {
-          // If the structure is wrong or the array is missing, treat as empty
-          console.warn("Unexpected API response structure for trending data:", response);
-          setTrendingData([]);
+            console.warn("Unexpected API response type:", typeof response);
         }
+
+        setTrendingData(data);
+
       } catch (err) {
         const apiError = err as ApiError;
         console.error("Failed to fetch trending data:", apiError);
         setError(apiError.detail || 'Could not load trending topics.');
-        setTrendingData([]); // Clear data on error
+        setTrendingData([]); // Ensure data is cleared on error.
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchTrendingData();
-  }, []); // Empty dependency array means this runs once on component mount
+  }, []);
 
-  // --- Render different UI based on the state ---
-
-  // 1. Loading State
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -67,7 +72,6 @@ export function TrendingPage() {
     );
   }
 
-  // 2. Error State
   if (error) {
     return (
       <div className="container mx-auto px-4 pt-28 text-center">
@@ -89,7 +93,6 @@ export function TrendingPage() {
           </p>
         </motion.div>
 
-        {/* 3. Empty State or Data List */}
         {trendingData.length === 0 ? (
           <Card className="p-8 text-center glass-card">
             <h3 className="text-xl font-semibold">No Trending Data Available</h3>

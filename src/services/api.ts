@@ -1,7 +1,7 @@
 import { getApiUrl } from '../lib/utils';
 import { ApiError } from '../types';
 
-// --- Community Feature Dummy Data ---
+// --- Dummy Data Definitions ---
 
 const DUMMY_LEADERBOARD = [
   { rank: 1, user: { name: 'Pravda Guardian', avatar: '' }, score: 1500 },
@@ -26,6 +26,12 @@ const DUMMY_DISCUSSIONS = [
   { id: '2', title: 'Discussion: Best practices for spotting fake text messages', author: 'Admin', replies: 12, last_activity: '1d ago' },
 ];
 
+const DUMMY_TRENDING = [
+    { id: '1', topic: 'Fake Holiday Giveaway on Social Media', category: 'Scam', detection_count: 1204, last_detected_at: '2025-11-03T14:00:00Z', sample_content: 'Click here to claim your free vacation! Limited time offer!', average_confidence: 95.4 },
+    { id: '2', topic: 'AI-Generated Celebrity Endorsement for Crypto', category: 'Deepfake', detection_count: 856, last_detected_at: '2025-11-03T13:30:00Z', sample_content: 'Invest in this new coin, I am using it myself and have made millions...', average_confidence: 99.1 },
+    { id: '3', topic: 'Misleading Health Claims About a New "Superfood"', category: 'Misinformation', detection_count: 672, last_detected_at: '2025-11-03T12:00:00Z', sample_content: 'This one fruit from the Amazon cures all diseases. Doctors are shocked!', average_confidence: 88.9 },
+];
+
 
 export class ApiClient {
   static async request<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -48,7 +54,18 @@ export class ApiClient {
       throw { ...error, status: response.status } as ApiError;
     }
     
-    return await response.json();
+    // For live API, return this
+    // return await response.json();
+
+    // For dummy data, we bypass the json parsing if the response might be empty
+     try {
+        return await response.json();
+    } catch (e) {
+        // If parsing fails (e.g., empty body), return an empty object 
+        // to prevent downstream errors, but log it.
+        console.error("Failed to parse JSON response, returning empty object.", e);
+        return {} as T;
+    }
   }
   
   // Auth
@@ -216,16 +233,14 @@ export class ApiClient {
     });
   }
   
-  // Get Trending
+  // Get Trending (Now with Dummy Data)
   static async getTrending(params?: {
     time_window?: number;
     country?: string;
     category?: string;
   }) {
-    const queryParams = new URLSearchParams(params as any);
-    return this.request(`/trending?${queryParams}`, {
-      method: 'GET',
-    });
+    console.warn("Using dummy data for getTrending");
+    return Promise.resolve(DUMMY_TRENDING);
   }
   
   // Get Trending Map

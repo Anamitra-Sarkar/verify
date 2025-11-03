@@ -424,12 +424,12 @@ export function SettingsPage({
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-gray-400" />
                         <span className="text-gray-600 dark:text-gray-400">Member since:</span>
-                        <span>{new Date().toLocaleDateString()}</span>
+                        <span>{new Date(user.createdAt).toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Shield className="w-4 h-4 text-gray-400" />
                         <span className="text-gray-600 dark:text-gray-400">User ID:</span>
-                        <span className="text-xs truncate">{user.uid.slice(0, 8)}...</span>
+                        <span className="text-xs truncate font-mono">{user.uid}</span>
                       </div>
                     </div>
                   </div>

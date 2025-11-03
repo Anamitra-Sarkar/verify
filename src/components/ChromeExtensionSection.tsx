@@ -214,9 +214,14 @@ export function ChromeExtensionSection() {
                   <p className="text-sm text-gray-600 dark:text-gray-400">Free • 50K+ users</p>
                 </div>
               </div>
-              <Button className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 gap-2">
+              <Button 
+                className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 gap-2"
+                onClick={() => {
+                  toast.info("Will soon be available on Chrome Web Store. For now, it is only available locally. Check the GitHub repo for installation instructions: https://github.com/Anamitra-Sarkar/verify");
+                }}
+              >
                 <Download className="w-5 h-5" />
-                Add to Chrome - It's Free
+                Coming Soon to Chrome Web Store
               </Button>
               <div className="mt-3 space-y-2">
                 <div className="flex gap-2">

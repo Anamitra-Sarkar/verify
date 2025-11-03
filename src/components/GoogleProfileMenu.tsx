@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { toast } from 'sonner';
 
 interface GoogleProfileMenuProps {
   user: any;
@@ -56,7 +57,7 @@ export function GoogleProfileMenu({ user, onNavigate, onLogout, onClose, onTheme
   const handleAddAccount = () => {
     setShowAddAccount(true);
     // In a real app, this would open Google account picker
-    alert('Add Account feature:\n\nIn production, this would:\n- Open Google account picker\n- Allow switching between accounts\n- Support multiple user sessions');
+    toast.info('Add Account feature will be available soon. This will allow you to switch between multiple accounts.');
     setShowAddAccount(false);
   };
 
@@ -238,7 +239,7 @@ export function GoogleProfileMenu({ user, onNavigate, onLogout, onClose, onTheme
           label="Notifications"
           description="Manage your alerts"
           onClick={() => {
-            alert('Notifications Settings:\n\n✅ Fake news alerts\n✅ Community updates\n✅ Trending topics\n✅ Security notifications\n\nGo to Settings to configure.');
+            toast.info('Configure your notifications in Settings: Fake news alerts, Community updates, Trending topics, and Security notifications.');
             onNavigate('Settings');
             onClose();
           }}
@@ -248,7 +249,7 @@ export function GoogleProfileMenu({ user, onNavigate, onLogout, onClose, onTheme
           label="Privacy & Security"
           description="Control your data and security"
           onClick={() => {
-            alert('Privacy & Security:\n\n🔒 Two-factor authentication\n🛡️ Login history\n📊 Data export\n🔐 Password change\n🗑️ Delete account\n\nGo to Settings for full options.');
+            toast.info('Manage Privacy & Security in Settings: Two-factor authentication, Login history, Data export, Password change, and more.');
             onNavigate('Settings');
             onClose();
           }}
@@ -261,7 +262,7 @@ export function GoogleProfileMenu({ user, onNavigate, onLogout, onClose, onTheme
             if (onThemeToggle) {
               onThemeToggle();
               const newTheme = !isDark ? 'Dark' : 'Light';
-              alert(`Theme changed to ${newTheme} mode! 🎨\n\nYou can also:\n- Auto theme (system)\n- Custom colors\n- Font size\n- Compact mode\n\nVisit Settings for more options.`);
+              toast.success(`Theme changed to ${newTheme} mode! Visit Settings for more customization options.`);
             }
           }}
         />
@@ -271,7 +272,7 @@ export function GoogleProfileMenu({ user, onNavigate, onLogout, onClose, onTheme
           description="Change your language"
           onClick={() => {
             const languages = ['English', 'हिंदी (Hindi)', 'বাংলা (Bengali)', 'தமிழ் (Tamil)', 'मराठी (Marathi)', 'తెలుగు (Telugu)'];
-            alert(`Available Languages:\n\n${languages.join('\n')}\n\nGo to Settings to change language.`);
+            toast.info(`Available Languages: ${languages.slice(0, 3).join(', ')}, and more. Go to Settings to change your language.`);
             onNavigate('Settings');
             onClose();
           }}

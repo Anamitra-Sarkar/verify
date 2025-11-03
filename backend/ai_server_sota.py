@@ -562,6 +562,12 @@ def analyze_image_with_sota(image_bytes: bytes) -> dict:
     is_fake = prob_fake > 0.5
     confidence = prob_fake if is_fake else (1 - prob_fake)
     
+    # CRITICAL FIX: Apply confidence threshold logic (< 70% should flip verdict)
+    # If confidence < 70%, the model is uncertain, so flip the verdict
+    if confidence < 0.70:
+        is_fake = not is_fake
+        # Confidence remains the same but verdict is flipped
+    
     # Generate detailed analysis
     if is_fake:
         if prob_fake > 0.9:
@@ -665,6 +671,13 @@ def analyze_video_with_sota(video_bytes: bytes) -> dict:
         avg_prob = total_prob / len(frame_results)
         is_fake_overall = fake_count > real_count
         confidence = fake_count / len(frame_results) if is_fake_overall else real_count / len(frame_results)
+        
+        # CRITICAL FIX: Apply confidence threshold logic (< 70% should flip verdict)
+        # If confidence < 70%, the model is uncertain, so flip the verdict
+        if confidence < 0.70:
+            is_fake_overall = not is_fake_overall
+            # Recalculate confidence after flip
+            confidence = real_count / len(frame_results) if is_fake_overall else fake_count / len(frame_results)
         
         # Generate analysis
         if is_fake_overall:
@@ -1652,8 +1665,9 @@ async def check_voice(file: UploadFile = File(...)):
                     model_prediction = False
                     model_confidence = 0.5
             
-            is_fake = prob_fake <= 0.5
-            confidence = (1 - prob_fake) if is_fake else prob_fake
+            # FIX: Correct label orientation - prob_fake > 0.5 means FAKE
+            is_fake = prob_fake > 0.5
+            confidence = prob_fake if is_fake else (1 - prob_fake)
             
             model_prediction = is_fake
             model_confidence = confidence

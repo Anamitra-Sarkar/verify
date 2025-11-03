@@ -21,6 +21,21 @@ interface TrendingTopic {
   average_confidence: number;
 }
 
+// Configuration constants
+const FAKE_CONTENT_ESTIMATE = 0.75; // Estimate 75% of content as fake for demo
+const DEMO_MODE = true; // Toggle between demo and production modes
+
+const CATEGORY_COLORS: Record<string, string> = {
+  politics: 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-400',
+  health: 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400',
+  misinformation: 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400',
+  science: 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400',
+  entertainment: 'bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400',
+  scam: 'bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400',
+  deepfake: 'bg-pink-100 text-pink-700 border-pink-300 dark:bg-pink-900/30 dark:text-pink-400',
+  default: 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-900/30 dark:text-gray-400'
+};
+
 export function TrendingPage({ language }: TrendingPageProps) {
   const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,23 +63,7 @@ export function TrendingPage({ language }: TrendingPageProps) {
 
   const getStatusColor = (category: string) => {
     const lowerCategory = category.toLowerCase();
-    switch (lowerCategory) {
-      case 'politics':
-        return 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-400';
-      case 'health':
-      case 'misinformation':
-        return 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400';
-      case 'science':
-        return 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400';
-      case 'entertainment':
-        return 'bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400';
-      case 'scam':
-        return 'bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400';
-      case 'deepfake':
-        return 'bg-pink-100 text-pink-700 border-pink-300 dark:bg-pink-900/30 dark:text-pink-400';
-      default:
-        return 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-900/30 dark:text-gray-400';
-    }
+    return CATEGORY_COLORS[lowerCategory] || CATEGORY_COLORS.default;
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -122,7 +121,7 @@ export function TrendingPage({ language }: TrendingPageProps) {
     }
     
     const totalChecks = trendingTopics.reduce((sum, topic) => sum + topic.detection_count, 0);
-    const totalFake = Math.floor(totalChecks * 0.75); // Estimate 75% fake
+    const totalFake = Math.floor(totalChecks * FAKE_CONTENT_ESTIMATE);
     const totalReal = totalChecks - totalFake;
     
     return {
@@ -170,7 +169,7 @@ export function TrendingPage({ language }: TrendingPageProps) {
             </div>
           </div>
           <p className="text-xl text-gray-600 dark:text-gray-400">
-            Real-time tracking of viral misinformation across regions (Demo with dummy data)
+            Real-time tracking of viral misinformation across regions{DEMO_MODE && ' (Demo with dummy data)'}
           </p>
         </motion.div>
 

@@ -19,40 +19,11 @@ interface TrendingTopic {
   total_checks: number;
   trending_score: number;
   created_at: string;
+  source_url?: string;
+  region?: string;
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-// Legacy dummy data as fallback
-const fallbackStories = [
-  {
-    id: 1,
-    headline: 'Viral video claims government policy change',
-    region: 'Maharashtra',
-    reports: 1247,
-    status: 'fake',
-    timeAgo: '2 hours ago',
-    engagement: '45K views',
-  },
-  {
-    id: 2,
-    headline: 'Celebrity endorsement screenshot circulating',
-    region: 'Karnataka',
-    reports: 892,
-    status: 'deepfake',
-    timeAgo: '5 hours ago',
-    engagement: '32K views',
-  },
-];
-
-const regionalHotspots = [
-  { region: 'Maharashtra', count: 3421, intensity: 95 },
-  { region: 'West Bengal', count: 2890, intensity: 82 },
-  { region: 'Karnataka', count: 2156, intensity: 75 },
-  { region: 'Tamil Nadu', count: 1847, intensity: 68 },
-  { region: 'Delhi', count: 1523, intensity: 62 },
-  { region: 'Gujarat', count: 1204, intensity: 55 },
-];
 
 export function TrendingPage({ language }: TrendingPageProps) {
   const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
@@ -184,6 +155,81 @@ export function TrendingPage({ language }: TrendingPageProps) {
     const diffDays = Math.floor(diffHours / 24);
     return `${diffDays} days ago`;
   };
+
+  // Calculate regional hotspots from trending topics
+  const getRegionalHotspots = () => {
+    const regionMap = new Map<string, number>();
+    
+    trendingTopics.forEach(topic => {
+      const region = topic.region || 'Global';
+      regionMap.set(region, (regionMap.get(region) || 0) + topic.total_checks);
+    });
+    
+    const regionValues = Array.from(regionMap.values());
+    const maxCount = regionValues.length > 0 ? Math.max(...regionValues) : 1;
+    
+    const hotspots = Array.from(regionMap.entries())
+      .map(([region, count]) => ({
+        region,
+        count,
+        intensity: Math.min((count / maxCount) * 100, 100)
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 6);
+    
+    // If no data, return some placeholder regions with minimal activity
+    if (hotspots.length === 0) {
+      return [
+        { region: 'Global', count: 0, intensity: 0 }
+      ];
+    }
+    
+    return hotspots;
+  };
+
+  // Calculate live statistics from trending topics
+  const getLiveStats = () => {
+    if (trendingTopics.length === 0) {
+      return {
+        activeReports: 0,
+        verifiedToday: 0,
+        flaggedFake: 0
+      };
+    }
+    
+    const totalChecks = trendingTopics.reduce((sum, topic) => sum + topic.total_checks, 0);
+    const totalFake = trendingTopics.reduce((sum, topic) => sum + topic.fake_count, 0);
+    const totalReal = trendingTopics.reduce((sum, topic) => sum + topic.real_count, 0);
+    
+    return {
+      activeReports: totalChecks,
+      verifiedToday: totalReal,
+      flaggedFake: totalFake
+    };
+  };
+
+  // Get top categories from trending topics
+  const getTopCategories = () => {
+    const categoryMap = new Map<string, number>();
+    
+    trendingTopics.forEach(topic => {
+      const category = topic.category || 'general';
+      categoryMap.set(category, (categoryMap.get(category) || 0) + topic.total_checks);
+    });
+    
+    return Array.from(categoryMap.entries())
+      .map(([category, count]) => ({
+        category: category.charAt(0).toUpperCase() + category.slice(1),
+        count
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 4);
+  };
+
+  const regionalHotspots = getRegionalHotspots();
+  const liveStats = getLiveStats();
+  const topCategories = getTopCategories();
+
 
   return (
     <div className="min-h-screen pt-28 pb-16">
@@ -324,7 +370,7 @@ export function TrendingPage({ language }: TrendingPageProps) {
                       animate={{ scale: [1, 1.1, 1] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     >
-                      12,487
+                      {liveStats.activeReports.toLocaleString()}
                     </motion.span>
                   </div>
                   <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -339,20 +385,20 @@ export function TrendingPage({ language }: TrendingPageProps) {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600 dark:text-gray-400">Verified Today</span>
-                    <span className="font-display text-2xl">8,234</span>
+                    <span className="font-display text-2xl">{liveStats.verifiedToday.toLocaleString()}</span>
                   </div>
                   <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-green-600" style={{ width: '66%' }} />
+                    <div className="h-full bg-green-600" style={{ width: `${Math.min((liveStats.verifiedToday / Math.max(liveStats.activeReports, 1)) * 100, 100)}%` }} />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600 dark:text-gray-400">Flagged as Fake</span>
-                    <span className="font-display text-2xl">4,253</span>
+                    <span className="font-display text-2xl">{liveStats.flaggedFake.toLocaleString()}</span>
                   </div>
                   <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-red-600" style={{ width: '34%' }} />
+                    <div className="h-full bg-red-600" style={{ width: `${Math.min((liveStats.flaggedFake / Math.max(liveStats.activeReports, 1)) * 100, 100)}%` }} />
                   </div>
                 </div>
               </div>
@@ -361,12 +407,17 @@ export function TrendingPage({ language }: TrendingPageProps) {
             <Card className="glass-card p-6">
               <h4 className="mb-4">Top Categories</h4>
               <div className="space-y-3">
-                {['Politics', 'Health', 'Technology', 'Entertainment'].map((category, idx) => (
-                  <div key={category} className="flex items-center justify-between">
-                    <span className="text-sm">{category}</span>
-                    <Badge variant="outline">{Math.floor(Math.random() * 3000) + 500}</Badge>
+                {topCategories.map((cat) => (
+                  <div key={cat.category} className="flex items-center justify-between">
+                    <span className="text-sm">{cat.category}</span>
+                    <Badge variant="outline">{cat.count}</Badge>
                   </div>
                 ))}
+                {topCategories.length === 0 && (
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    No data available
+                  </div>
+                )}
               </div>
             </Card>
           </motion.div>
@@ -393,35 +444,48 @@ export function TrendingPage({ language }: TrendingPageProps) {
           )}
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(trendingTopics.length > 0 ? trendingTopics : fallbackStories).map((story, idx) => {
-              const isApiData = 'trending_score' in story;
-              const title = isApiData ? (story as TrendingTopic).title : (story as typeof fallbackStories[0]).headline;
-              const category = isApiData ? (story as TrendingTopic).category : 'general';
-              const reports = isApiData ? (story as TrendingTopic).total_checks : (story as typeof fallbackStories[0]).reports;
-              const timeAgo = isApiData ? formatTimeAgo((story as TrendingTopic).created_at) : (story as typeof fallbackStories[0]).timeAgo;
-              const region = isApiData ? 'Global' : (story as typeof fallbackStories[0]).region;
-              const engagement = isApiData ? `${Math.floor(reports / 10)}K views` : (story as typeof fallbackStories[0]).engagement;
+            {trendingTopics.length === 0 && !loading && !error && (
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-500 dark:text-gray-400">
+                  No trending topics available. Tavily API may need configuration.
+                </p>
+              </div>
+            )}
+            
+            {trendingTopics.map((topic, idx) => {
+              const timeAgo = formatTimeAgo(topic.created_at);
+              const region = topic.region || 'Global';
+              const engagement = `${Math.floor(topic.total_checks / 10)}K views`;
+              
+              const handleClick = () => {
+                if (topic.source_url) {
+                  window.open(topic.source_url, '_blank', 'noopener,noreferrer');
+                }
+              };
               
               return (
                 <motion.div
-                  key={story.id}
+                  key={topic.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 + idx * 0.1 }}
                   whileHover={{ y: -5 }}
                 >
-                  <Card className="glass-card p-6 h-full hover:shadow-xl transition-shadow cursor-pointer">
+                  <Card 
+                    className="glass-card p-6 h-full hover:shadow-xl transition-shadow cursor-pointer"
+                    onClick={handleClick}
+                  >
                     <div className="flex items-start justify-between mb-3">
-                      <Badge className={`${getStatusColor(category)} border`}>
-                        {category.toUpperCase()}
+                      <Badge className={`${getStatusColor(topic.category)} border`}>
+                        {topic.category.toUpperCase()}
                       </Badge>
                       <div className="flex items-center gap-1 text-sm text-gray-500">
                         <AlertCircle className="w-4 h-4" />
-                        <span>{reports}</span>
+                        <span>{topic.total_checks}</span>
                       </div>
                     </div>
 
-                    <h4 className="mb-4 line-clamp-2">{title}</h4>
+                    <h4 className="mb-4 line-clamp-2">{topic.title}</h4>
 
                     <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                       <div className="flex items-center gap-2">
@@ -438,16 +502,20 @@ export function TrendingPage({ language }: TrendingPageProps) {
                       </div>
                     </div>
                     
-                    {isApiData && (
-                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-red-600 dark:text-red-400">
-                            {Math.round(((story as TrendingTopic).fake_count / (story as TrendingTopic).total_checks) * 100)}% fake
-                          </span>
-                          <span className="text-green-600 dark:text-green-400">
-                            {Math.round(((story as TrendingTopic).real_count / (story as TrendingTopic).total_checks) * 100)}% real
-                          </span>
-                        </div>
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-red-600 dark:text-red-400">
+                          {Math.round((topic.fake_count / topic.total_checks) * 100)}% fake
+                        </span>
+                        <span className="text-green-600 dark:text-green-400">
+                          {Math.round((topic.real_count / topic.total_checks) * 100)}% real
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {topic.source_url && (
+                      <div className="mt-3 text-xs text-blue-600 dark:text-blue-400">
+                        Click to view source →
                       </div>
                     )}
                   </Card>

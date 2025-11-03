@@ -79,6 +79,12 @@ async function fetchLeaderboard(token?: string): Promise<LeaderboardEntry[]> {
       headers,
     });
     
+    if (response.status === 404 || response.status === 503) {
+      // Endpoint not available or database not configured
+      console.log('Leaderboard endpoint not available');
+      return [];
+    }
+    
     if (!response.ok) {
       throw new Error('Failed to fetch leaderboard');
     }
@@ -99,6 +105,11 @@ async function fetchUserStats(token: string): Promise<UserStats | null> {
       },
     });
     
+    if (response.status === 404 || response.status === 503) {
+      console.log('User stats endpoint not available');
+      return null;
+    }
+    
     if (!response.ok) {
       return null;
     }
@@ -118,6 +129,11 @@ async function fetchBadges(token: string): Promise<BadgeInfo[]> {
         'Content-Type': 'application/json',
       },
     });
+    
+    if (response.status === 404 || response.status === 503) {
+      console.log('Badges endpoint not available');
+      return [];
+    }
     
     if (!response.ok) {
       return [];
@@ -143,6 +159,11 @@ async function fetchDiscussions(token?: string): Promise<Discussion[]> {
     const response = await fetch(`${API_BASE_URL}/community/discussions?limit=20`, {
       headers,
     });
+    
+    if (response.status === 404 || response.status === 503) {
+      console.log('Discussions endpoint not available');
+      return [];
+    }
     
     if (!response.ok) {
       return [];
@@ -268,9 +289,14 @@ export function CommunityPage({ language }: CommunityPageProps) {
       setUserStats(stats);
       setBadgesData(badges);
       setDiscussions(disc);
+      
+      // Show info if no data available (database not configured)
+      if (leaderboard.length === 0 && badges.length === 0 && disc.length === 0) {
+        console.log('Community features require database configuration');
+      }
     } catch (error) {
       console.error('Error loading community data:', error);
-      toast.error('Failed to load community data');
+      // Don't show error toast - empty state is fine
     } finally {
       setLoading(false);
     }

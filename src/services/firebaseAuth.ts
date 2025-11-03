@@ -20,6 +20,7 @@ export interface FirebaseUser {
   displayName: string | null;
   photoURL: string | null;
   emailVerified: boolean;
+  createdAt: string; // User creation timestamp
 }
 
 class FirebaseAuthService {
@@ -116,7 +117,8 @@ class FirebaseAuthService {
       email: user.email,
       displayName: user.displayName,
       photoURL: user.photoURL,
-      emailVerified: user.emailVerified
+      emailVerified: user.emailVerified,
+      createdAt: user.metadata.creationTime || new Date().toISOString()
     };
   }
 

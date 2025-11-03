@@ -26,6 +26,8 @@ class TrendingTopic(BaseModel):
     total_checks: int
     trending_score: float
     created_at: str
+    source_url: str = ""  # URL to the source/article
+    region: str = ""  # Region/location information
 
 # Initialize Tavily client
 try:
@@ -129,7 +131,9 @@ async def get_trending_topics(
                             real_count=real_count,
                             total_checks=total_checks,
                             trending_score=trending_score,
-                            created_at=datetime.utcnow().isoformat()
+                            created_at=datetime.utcnow().isoformat(),
+                            source_url=url,
+                            region=location or country
                         ))
                         
                         topic_id += 1

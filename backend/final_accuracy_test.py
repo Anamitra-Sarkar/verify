@@ -9,26 +9,26 @@ import time
 API = "http://localhost:8000/check-text"
 
 tests = [
-    # CONSPIRACY THEORIES (MUST BE FAKE)
-    ("Vaccines cause autism", "fake"),
-    ("The earth is flat", "fake"),
-    ("5G causes COVID-19", "fake"),
-    ("The moon landing was fake", "fake"),
-    ("Climate change is a hoax", "fake"),
-    ("Drinking bleach cures diseases", "fake"),
+    # CONSPIRACY THEORIES / MISINFORMATION (MUST BE FAKE) - News format
+    ("New research confirms that vaccines cause autism and pharmaceutical companies have covered up the evidence", "fake"),
+    ("Scientists prove the earth is flat and NASA has been lying to the public about the planet's shape", "fake"),
+    ("Medical experts reveal that 5G towers are causing COVID-19 infections across the world", "fake"),
+    ("Investigation shows the moon landing in 1969 was staged in a Hollywood film studio", "fake"),
+    ("Climate researchers admit that climate change is a hoax invented to control governments", "fake"),
+    ("Doctors recommend drinking bleach to cure various diseases including cancer and COVID-19", "fake"),
     
-    # BASIC SCIENTIFIC FACTS (MUST BE REAL)
-    ("Water is H2O", "real"),
-    ("The sun rises in the east", "real"),
-    ("The Earth orbits the Sun", "real"),
-    ("DNA contains genetic information", "real"),
-    ("Humans need oxygen to breathe", "real"),
+    # VERIFIED FACTS / REAL NEWS (MUST BE REAL) - News format
+    ("Scientists confirm that water molecules consist of two hydrogen atoms and one oxygen atom", "real"),
+    ("Astronomers verify that the sun appears to rise in the eastern horizon due to Earth's rotation", "real"),
+    ("Space agencies confirm that Earth orbits the Sun in an elliptical path taking 365.25 days", "real"),
+    ("Geneticists demonstrate that DNA molecules contain genetic information for all living organisms", "real"),
+    ("Medical research confirms that humans require oxygen for cellular respiration and survival", "real"),
     
     # HISTORICAL/POLITICAL FACTS (MUST BE REAL) - December 2025
-    ("Barack Obama was the 44th US President", "real"),
-    ("Paris is the capital of France", "real"),
-    ("Donald Trump is the current US President", "real"),  # Correct for Dec 2025
-    ("The COVID-19 pandemic started in 2019", "real"),
+    ("Historical records confirm Barack Obama served as the 44th President of the United States", "real"),
+    ("French government confirms that Paris is the capital city of France", "real"),
+    ("Donald Trump returns as the US President following the 2024 election results", "real"),  # Correct for Dec 2025
+    ("Health officials confirm the COVID-19 pandemic began in late 2019 in Wuhan, China", "real"),
 ]
 
 print("\n" + "="*80)

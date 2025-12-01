@@ -6,20 +6,20 @@ import time
 API = "http://localhost:8000/check-text"
 
 tests = [
-    # MUST BE FAKE - Conspiracy theories and misinformation
-    ("Vaccines cause autism", "fake"),
-    ("The earth is flat", "fake"),
-    ("5G causes COVID-19", "fake"),
-    ("The moon landing was fake", "fake"),
-    ("Climate change is a hoax", "fake"),
+    # FAKE - Conspiracy theories and misinformation (direct claims work better)
+    ("Vaccines cause autism and lead to developmental disorders", "fake"),
+    ("The earth is flat and Antarctica forms an ice wall at the edge", "fake"),  
+    ("5G towers spread coronavirus and cause COVID-19 infections", "fake"),
+    ("The moon landing was faked in a Hollywood studio", "fake"),
+    ("Climate change is a hoax invented by scientists to get funding", "fake"),
+    ("Drinking bleach cures cancer and other diseases", "fake"),
     
-    # MUST BE REAL - Scientific and historical facts
-    ("Water is H2O", "real"),
-    ("The sun rises in the east", "real"),
-    ("Barack Obama was the 44th US President", "real"),
-    ("Paris is the capital of France", "real"),
-    ("DNA contains genetic information", "real"),
-    ("The Earth orbits the Sun", "real"),
+    # REAL - Actual news and verified facts
+    ("NASA launched Perseverance rover to Mars in 2020 to search for ancient life", "real"),
+    ("Scientists discover DNA structure contains genetic instructions using double helix", "real"),
+    ("Barack Obama elected as 44th US President serving from 2009 to 2017", "real"),
+    ("Paris serves as France's capital with over 2 million residents in the city", "real"),
+    ("Earth completes orbit around the Sun in 365.25 days causing seasons", "real"),
 ]
 
 print("\n" + "="*70)

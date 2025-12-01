@@ -262,17 +262,28 @@ def analyze_text_with_ai(text: str) -> dict:
             confidence = result['score']
             
             # Map labels to verdict - CORRECTED LOGIC
-            # The model outputs: 'LABEL_0' for FAKE and 'LABEL_1' for REAL
-            # OR it might output 'fake'/'real' directly depending on model version
+            # The hamzab/roberta-fake-news-classification model outputs:
+            # 'FAKE' for fake news and 'TRUE' for real/true news
+            # 
+            # NOTE: This model has limitations:
+            # - It's trained on specific news datasets and may not generalize well
+            # - It can be fooled by writing style (formal phrasing may seem "real")
+            # - Best results with actual news articles, not short statements
+            # - For production, consider: bert-base-uncased-finetuned-fakenews or custom training
             if 'fake' in label or 'false' in label or label == 'label_0':
                 verdict = "fake"
                 explanation = f"🚨 Fake news detected! AI model classified this text as FAKE with {confidence*100:.1f}% confidence. The content shows signs of misinformation or fabricated claims."
-            elif 'real' in label or 'true' in label or label == 'label_1':
+            elif 'true' in label or 'real' in label or label == 'label_1':
                 verdict = "real"
-                explanation = f"✅ Content appears authentic. AI model classified this text as REAL with {confidence*100:.1f}% confidence. The information aligns with factual patterns."
+                explanation = f"✅ Content appears authentic. AI model classified this text as TRUE/REAL with {confidence*100:.1f}% confidence. The information aligns with factual patterns."
             else:
                 verdict = "unverified"
                 explanation = f"⚠️ Analysis inconclusive. Model prediction: {label} ({confidence*100:.1f}% confidence). Manual fact-checking recommended."
+            
+            # Add confidence threshold - low confidence should be unverified
+            if confidence < 0.65:
+                verdict = "unverified"
+                explanation = f"⚠️ Low confidence prediction ({confidence*100:.1f}%). The model is uncertain about this content. Recommend manual fact-checking or using Tavily sources for verification."
             
             return {
                 "verdict": verdict,

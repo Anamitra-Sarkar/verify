@@ -1,37 +1,40 @@
 """
-FINAL COMPREHENSIVE ACCURACY TEST (November 2025)
-Testing with correct current facts
+FINAL COMPREHENSIVE ACCURACY TEST (December 2025)
+Testing with correct current facts and proper endpoint
 """
 import requests
 import time
 
-API = "http://localhost:8000/api/v1/check-text"
+# Use the correct endpoint from ai_server.py
+API = "http://localhost:8000/check-text"
 
 tests = [
     # CONSPIRACY THEORIES (MUST BE FAKE)
-    ("Vaccines cause autism", "FAKE"),
-    ("The earth is flat", "FAKE"),
-    ("5G causes COVID-19", "FAKE"),
-    ("The moon landing was fake", "FAKE"),
-    ("Climate change is a hoax", "FAKE"),
-    ("Drinking bleach cures diseases", "FAKE"),
+    ("Vaccines cause autism", "fake"),
+    ("The earth is flat", "fake"),
+    ("5G causes COVID-19", "fake"),
+    ("The moon landing was fake", "fake"),
+    ("Climate change is a hoax", "fake"),
+    ("Drinking bleach cures diseases", "fake"),
     
     # BASIC SCIENTIFIC FACTS (MUST BE REAL)
-    ("Water is H2O", "REAL"),
-    ("The sun rises in the east", "REAL"),
-    ("The Earth orbits the Sun", "REAL"),
-    ("DNA contains genetic information", "REAL"),
-    ("Humans need oxygen to breathe", "REAL"),
+    ("Water is H2O", "real"),
+    ("The sun rises in the east", "real"),
+    ("The Earth orbits the Sun", "real"),
+    ("DNA contains genetic information", "real"),
+    ("Humans need oxygen to breathe", "real"),
     
-    # HISTORICAL/POLITICAL FACTS (MUST BE REAL) - November 2025
-    ("Barack Obama was the 44th US President", "REAL"),
-    ("Paris is the capital of France", "REAL"),
-    ("Donald Trump is the current US President", "REAL"),  # Correct for Nov 2025
-    ("The COVID-19 pandemic started in 2019", "REAL"),
+    # HISTORICAL/POLITICAL FACTS (MUST BE REAL) - December 2025
+    ("Barack Obama was the 44th US President", "real"),
+    ("Paris is the capital of France", "real"),
+    ("Donald Trump is the current US President", "real"),  # Correct for Dec 2025
+    ("The COVID-19 pandemic started in 2019", "real"),
 ]
 
 print("\n" + "="*80)
-print("🧪 FINAL COMPREHENSIVE ACCURACY TEST (November 2025)")
+print("🧪 FINAL COMPREHENSIVE ACCURACY TEST (December 2025)")
+print("="*80)
+print("Testing AI models: RoBERTa Fake News Detector + Tavily Fact-Checking")
 print("="*80 + "\n")
 
 correct = 0
@@ -44,24 +47,44 @@ for i, (claim, expected) in enumerate(tests, 1):
         
         r = requests.post(API, json={"text": claim}, timeout=40)
         result = r.json()
-        verdict = result.get('verdict', 'UNKNOWN')
-        confidence = result.get('confidence', 0)
         
-        is_correct = verdict == expected
+        # The endpoint returns is_fake boolean
+        is_fake = result.get('is_fake', False)
+        verdict = "fake" if is_fake else "real"
+        confidence = result.get('confidence', 0)
+        analysis = result.get('analysis', '')
+        
+        # Normalize comparison
+        is_correct = verdict.lower() == expected.lower()
         status = "✅" if is_correct else "❌"
         
         if is_correct:
             correct += 1
         else:
-            errors.append((claim, expected, verdict, confidence))
+            errors.append({
+                'claim': claim,
+                'expected': expected,
+                'got': verdict,
+                'confidence': confidence,
+                'analysis': analysis[:150]
+            })
         
-        print(f"   {status} Expected: {expected:4s} | Got: {verdict:4s} ({confidence*100:.1f}%)\n")
+        print(f"   {status} Expected: {expected.upper():5s} | Got: {verdict.upper():5s} ({confidence*100:.1f}%)")
+        if not is_correct:
+            print(f"   Analysis preview: {analysis[:80]}...")
+        print()
         
         time.sleep(1.5)
         
     except Exception as e:
         print(f"   ❌ ERROR: {str(e)[:80]}\n")
-        errors.append((claim, expected, "ERROR", 0))
+        errors.append({
+            'claim': claim,
+            'expected': expected,
+            'got': "ERROR",
+            'confidence': 0,
+            'analysis': str(e)
+        })
 
 # Results
 print("="*80)
@@ -78,26 +101,22 @@ if errors:
     print("="*80)
     print("❌ INCORRECT PREDICTIONS:")
     print("="*80 + "\n")
-    for claim, expected, got, conf in errors:
-        print(f"  Claim: {claim}")
-        print(f"    Expected: {expected} | Got: {got} ({conf*100:.1f}%)\n")
+    for err in errors:
+        print(f"  Claim: {err['claim']}")
+        print(f"    Expected: {err['expected'].upper()} | Got: {err['got'].upper()} ({err['confidence']*100:.1f}%)")
+        print(f"    Analysis: {err['analysis']}")
+        print()
 
 # Grade
+print("="*80)
 if accuracy >= 95:
-    print("="*80)
-    print("🏆 EXCELLENT! Model is highly accurate!")
-    print("="*80)
+    print("🏆 EXCELLENT! Model is highly accurate and production-ready!")
 elif accuracy >= 85:
-    print("="*80)
-    print("✅ VERY GOOD! Model is performing well!")
-    print("="*80)
+    print("✅ VERY GOOD! Model is performing well for production use!")
 elif accuracy >= 75:
-    print("="*80)
-    print("⚠️  GOOD but could be better")
-    print("="*80)
+    print("⚠️  GOOD but could be better - acceptable for production")
 else:
-    print("="*80)
-    print("❌ NEEDS IMPROVEMENT")
-    print("="*80)
+    print("❌ NEEDS IMPROVEMENT - requires model tuning or better training data")
+print("="*80)
 
 print()

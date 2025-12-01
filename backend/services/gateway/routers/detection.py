@@ -4,7 +4,6 @@ Detection API endpoints for text, image, video, and voice analysis.
 import uuid
 from typing import Optional
 from fastapi import APIRouter, Depends, File, UploadFile, Form, BackgroundTasks, HTTPException, status
-from fastapi import APIRouter, Depends, File, UploadFile, Form, BackgroundTasks, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
@@ -12,6 +11,7 @@ from shared.database.session import get_db
 from shared.database.models import Detection, DetectionType, DetectionVerdict, VideoJob, JobStatus    
 from shared.auth.jwt import get_current_user_id, get_optional_user_id
 from shared.config import settings
+# TODO: Implement DetectionService and TranslationService
 # from ..services.detection_service import DetectionService
 # from ..services.translation_service import TranslationService
 import time

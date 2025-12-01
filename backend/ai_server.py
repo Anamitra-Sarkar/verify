@@ -39,12 +39,19 @@ except ImportError:
 
 # Load environment variables
 from dotenv import load_dotenv
+import tempfile
 load_dotenv()
 
 # Get API keys
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
 HUGGINGFACE_TOKEN = os.getenv("HUGGINGFACE_TOKEN", "")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+
+# Configuration constants
+CONFIDENCE_THRESHOLD = 0.65  # Below this threshold, verdict is "unverified"
+MAX_VIDEO_SIZE_MB = 100
+MAX_AUDIO_SIZE_MB = 20
+MAX_IMAGE_SIZE_MB = 10
 
 # Create FastAPI app
 app = FastAPI(
@@ -281,7 +288,7 @@ def analyze_text_with_ai(text: str) -> dict:
                 explanation = f"⚠️ Analysis inconclusive. Model prediction: {label} ({confidence*100:.1f}% confidence). Manual fact-checking recommended."
             
             # Add confidence threshold - low confidence should be unverified
-            if confidence < 0.65:
+            if confidence < CONFIDENCE_THRESHOLD:
                 verdict = "unverified"
                 explanation = f"⚠️ Low confidence prediction ({confidence*100:.1f}%). The model is uncertain about this content. Recommend manual fact-checking or using Tavily sources for verification."
             
@@ -490,18 +497,19 @@ async def check_video_short(file: UploadFile = File(...)):
     try:
         # Read video file with size validation
         video_bytes = await file.read()
-        max_video_size = 100 * 1024 * 1024  # 100MB
+        max_video_size = MAX_VIDEO_SIZE_MB * 1024 * 1024
         if len(video_bytes) > max_video_size:
-            raise HTTPException(status_code=413, detail="Video file too large. Maximum size: 100MB")
+            raise HTTPException(status_code=413, detail=f"Video file too large. Maximum size: {MAX_VIDEO_SIZE_MB}MB")
         
         # For video analysis, we extract key frames and analyze them
         import cv2
         import numpy as np
         
-        # Save temporary video file
-        temp_video_path = f"/tmp/temp_video_{uuid_module.uuid4()}.mp4"
-        with open(temp_video_path, "wb") as f:
-            f.write(video_bytes)
+        # Save temporary video file (cross-platform compatible)
+        temp_video_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
+        temp_video_path = temp_video_file.name
+        temp_video_file.write(video_bytes)
+        temp_video_file.close()
         
         # Extract and analyze frames
         video_capture = cv2.VideoCapture(temp_video_path)
@@ -632,15 +640,15 @@ async def check_voice_short(file: UploadFile = File(...)):
     try:
         # Read audio file with validation
         audio_bytes = await file.read()
-        max_audio_size = 20 * 1024 * 1024  # 20MB
+        max_audio_size = MAX_AUDIO_SIZE_MB * 1024 * 1024
         if len(audio_bytes) > max_audio_size:
-            raise HTTPException(status_code=413, detail="Audio file too large. Maximum size: 20MB")
+            raise HTTPException(status_code=413, detail=f"Audio file too large. Maximum size: {MAX_AUDIO_SIZE_MB}MB")
         
-        # Save temporary audio file
-        import uuid as uuid_module
-        temp_audio_path = f"/tmp/temp_audio_{uuid_module.uuid4()}.wav"
-        with open(temp_audio_path, "wb") as f:
-            f.write(audio_bytes)
+        # Save temporary audio file (cross-platform compatible)
+        temp_audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+        temp_audio_path = temp_audio_file.name
+        temp_audio_file.write(audio_bytes)
+        temp_audio_file.close()
         
         # Run voice deepfake detection
         # The audio-classification pipeline expects file path or audio array

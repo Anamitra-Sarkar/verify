@@ -1,9 +1,23 @@
 """
 Detection API endpoints for text, image, video, and voice analysis.
+
+NOTE: This file is part of a microservices architecture that is NOT currently active.
+The working backend server is ai_server.py in the backend/ directory.
+
+These endpoints are template code for future migration to a microservices architecture
+with separate gateway, detection service, and translation service.
+
+TODO: Complete microservices implementation:
+1. Implement DetectionService class
+2. Implement TranslationService class  
+3. Set up proper database connections
+4. Configure authentication
+5. Deploy as separate services
+
+For now, use ai_server.py which has all functionality in a monolithic design.
 """
 import uuid
 from typing import Optional
-from fastapi import APIRouter, Depends, File, UploadFile, Form, BackgroundTasks, HTTPException, status
 from fastapi import APIRouter, Depends, File, UploadFile, Form, BackgroundTasks, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
@@ -12,6 +26,7 @@ from shared.database.session import get_db
 from shared.database.models import Detection, DetectionType, DetectionVerdict, VideoJob, JobStatus    
 from shared.auth.jwt import get_current_user_id, get_optional_user_id
 from shared.config import settings
+# TODO: Implement DetectionService and TranslationService
 # from ..services.detection_service import DetectionService
 # from ..services.translation_service import TranslationService
 import time
@@ -58,44 +73,68 @@ class VideoResultResponse(BaseModel):
     error_message: Optional[str] = None
 
 
+# ============================================================================
+# IMPORTANT: These endpoints are TEMPLATE CODE for future microservices architecture
+# They require DetectionService and TranslationService which are NOT yet implemented
+# 
+# For WORKING detection endpoints, use: backend/ai_server.py
+# 
+# The endpoints below will cause runtime errors if called because:
+# - DetectionService class doesn't exist
+# - TranslationService class doesn't exist
+# - Database models may not match
+# 
+# TODO: To activate these endpoints:
+# 1. Implement DetectionService in backend/services/detection_service.py
+# 2. Implement TranslationService in backend/services/translation_service.py
+# 3. Test database connectivity
+# 4. Deploy as microservices
+# ============================================================================
+
 @router.post("/check-text", response_model=DetectionResponse)
-async def check_text(
-    request: TextDetectionRequest,
-    db: AsyncSession = Depends(get_db),
-    user_id: Optional[int] = Depends(get_optional_user_id),
-):
-    """
-    Check text content for fake news or misinformation.
-    
-    - Automatically detects language
-    - Translates to English if necessary
-    - Routes to appropriate model (LIAR for US politics, Brain2 for general)
-    - Returns verdict with explanation
-    """
-    detection_service = DetectionService(db)
-    translation_service = TranslationService()
-    
-    # Detect language
-    detected_language = request.language or await translation_service.detect_language(request.text)
-    
-    # Translate if necessary
-    text_to_analyze = request.text
-    translated = False
-    
-    if detected_language != "en":
-        text_to_analyze = await translation_service.translate_to_english(request.text, detected_language)
-        translated = True
-    
-    # Perform detection
-    result = await detection_service.check_text(
-        text=text_to_analyze,
-        original_text=request.text,
-        language=detected_language,
-        user_id=user_id,
-        translated=translated
-    )
-    
-    return result
+# async def check_text(
+#     request: TextDetectionRequest,
+#     db: AsyncSession = Depends(get_db),
+#     user_id: Optional[int] = Depends(get_optional_user_id),
+# ):
+#     """
+#     Check text content for fake news or misinformation.
+#     
+#     - Automatically detects language
+#     - Translates to English if necessary
+#     - Routes to appropriate model (LIAR for US politics, Brain2 for general)
+#     - Returns verdict with explanation
+#     
+#     TODO: Implement DetectionService with:
+#     - Language detection
+#     - Translation to English
+#     - Model routing logic
+#     - Database logging
+#     """
+#     detection_service = DetectionService(db)
+#     translation_service = TranslationService()
+#     
+#     # Detect language
+#     detected_language = request.language or await translation_service.detect_language(request.text)
+#     
+#     # Translate if necessary
+#     text_to_analyze = request.text
+#     translated = False
+#     
+#     if detected_language != "en":
+#         text_to_analyze = await translation_service.translate_to_english(request.text, detected_language)
+#         translated = True
+#     
+#     # Perform detection
+#     result = await detection_service.check_text(
+#         text=text_to_analyze,
+#         original_text=request.text,
+#         language=detected_language,
+#         user_id=user_id,
+#         translated=translated
+#     )
+#     
+#     return result
 
 
 @router.post("/check-image", response_model=DetectionResponse)

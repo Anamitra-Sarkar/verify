@@ -30,7 +30,9 @@ def test_health():
         ai_status = data.get('ai_status', {})
         print(f"  • Transformers Available: {'✅' if ai_status.get('transformers_available') else '❌'}")
         print(f"  • Fake News Detector (RoBERTa): {'✅' if ai_status.get('fake_news_detector') else '❌'}")
-        print(f"  • Image Classifier (ResNet-50): {'✅' if ai_status.get('image_classifier') else '❌'}")
+        print(f"  • Image Deepfake Detector (ResNet-50): {'✅' if ai_status.get('image_deepfake_detector') else '❌'}")
+        print(f"  • Video Deepfake Detector: {'✅' if ai_status.get('video_deepfake_detector') else '❌'}")
+        print(f"  • Voice Deepfake Detector: {'✅' if ai_status.get('voice_deepfake_detector') else '❌'}")
         print(f"  • Tavily API: {'✅' if ai_status.get('tavily') else '❌'}")
         print(f"  • Sentiment Analyzer (Fallback): {'✅' if ai_status.get('sentiment_analyzer') else '❌'}")
         
